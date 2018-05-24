@@ -90,18 +90,83 @@ def walkable(view,x,y):
                             change = 1
                     if j < 4:
                         if test[i][j+1] in free:
-                            test[i][j+1] = test[i][j] + 'L'
+                            test[i][j+1] = test[i][j] + 'R'
                             change = 1
                     if j > 0:
                         if test[i][j-1] in free:
-                            test[i][j-1] = test[i][j] + 'R'
+                            test[i][j-1] = test[i][j] + 'L'
                             change = 1
     
     check = re.sub('[RLUD]','',test[y][x])
     if check == '^':
-        return test[y][x]
+        return turnToPath(test[y][x])
     else:
         return 'false'
+
+def rotate(dir, cur):
+    print(dir)
+    print(cur)
+    if dir == cur:
+        return ''
+    if cur + 1 == dir:
+        return 'r'
+    if cur - 1 == dir:
+        return 'l'
+    if cur + 2 == dir or cur - 2 == dir:
+        return 'rr'
+    if cur - 3 == dir:
+        return 'r'
+    if cur + 3 == dir:
+        return 'l'
+
+def turnToPath(directions):
+    arr = list(directions.replace("^",""))
+    facing = 0
+    res = ''
+    for i in arr:
+        print(i)
+        if i == 'U':
+            res = res + rotate(0,facing) + 'f'
+            facing = 0
+        if i == 'R':
+            res = res + rotate(1,facing) + 'f'
+            facing = 1
+        if i == 'D':
+            res = res + rotate(2,facing) + 'f'
+            facing = 2
+        if i == 'L':
+            res = res + rotate(3,facing) + 'f'
+            facing = 3
+    return res
+    
+# rotates from current direction to desired direction
+def rotate(dir, cur):
+    if dir == cur:
+        return ''
+    if cur + 1 == dir:
+        return 'r'
+    if cur - 1 == dir:
+        return 'l'
+    if cur + 2 == dir or cur - 2 == dir:
+        return 'rr'
+    if cur - 3 == dir:
+        return 'r'
+
+def turnToPath(directions):
+    arr = list(directions.replace("^",""))
+    facing = 0
+    res = ''
+    for i in arr:
+        if i == 'U':
+            res = res + rotate(0,facing) + 'f'
+        if i == 'R':
+            res = res + rotate(1,facing) + 'f'
+        if i == 'D':
+            res = res + rotate(2,facing) + 'f'
+        if i == 'L':
+            res = res + rotate(3,facing) + 'f'
+    return res
+    
 
 # helper function to print the grid
 def print_grid(view):
