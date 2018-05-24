@@ -3,11 +3,11 @@
 import copy
 import re
 
-array = [[' ',' ',' ',' ',' '],
-        [' ',' ','*',' ',' '],
-        [' ',' ','^','*',' '],
-        [' ',' ',' ',' ',' '],
-        [' ',' ',' ',' ',' ']]
+array = [[' ','T',' ',' ',' '],
+        [' ','*','*',' ',' '],
+        [' ',' ','^','*','~'],
+        [' ',' ',' ',' ','*'],
+        [' ',' ',' ',' ','*']]
 
 def walkable(view,x,y):
     # find location of player
@@ -43,12 +43,9 @@ def walkable(view,x,y):
     if check == '^':
         return turnToPath(test[y][x])
     else:
-        return 'false'
-
+        return 'False'
 
 def rotate(dir, cur):
-    print(dir)
-    print(cur)
     if dir == cur:
         return ''
     if cur + 1 == dir:
@@ -67,7 +64,6 @@ def turnToPath(directions):
     facing = 0
     res = ''
     for i in arr:
-        print(i)
         if i == 'U':
             res = res + rotate(0,facing) + 'f'
             facing = 0
@@ -80,5 +76,5 @@ def turnToPath(directions):
         if i == 'L':
             res = res + rotate(3,facing) + 'f'
             facing = 3
-    return res
+    return res    
 print(walkable(array,4,2))

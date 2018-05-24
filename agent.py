@@ -41,52 +41,59 @@ def get_action(view):
                 if abs(i - 1) + abs (j - 2) <= low:
                     x = i
                     y = j  
-                    low = abs(i-1) + abs(j-2) 
-    path = walkable(view,x,y)
-    path = path.split()
-    if path[0] != 'F':
-        return path[0]    
-    while 1:
-        inp = random.randrange(6)
-        if inp < 4:
-            move = 'f'
-        if inp == 4:
-            move = 'l'
-        if inp == 5:
-            move = 'r'
-        if view[1][2] == 'T' and axe == 1:
-            move = 'c'
-            raft = raft + 1
-        if view[1][2] == 'a' and axe == 0:
-            axe = 1
-            move = 'f'
-        if view[1][2] == 'k' and key == 0:
-            key = 1
-            move = 'f'
-        if view[1][2] == '-' and key == 1:
-            move = 'u'
-        if view[1][2] == 'o':
-            move = 'f'
-            stone = stone + 1
-        if view[1][2] == '*' or view[1][2]== '.':
-            x = random.randrange(2)
-            if view[2][1] == '*':
-                move = 'r'
-            elif view[2][3] == '*':
+                    low = abs(i-1) + abs(j-2)
+    print(1)
+    try:
+        path = walkable(view,y,x)
+        path = path.split()
+        if path[0] != 'F':
+            print(x)
+            print(y)
+            return path[0]
+    except NameError:
+        while 1:
+            print('random')
+            inp = random.randrange(6)
+            if inp < 4:
+                move = 'f'
+            if inp == 4:
                 move = 'l'
-            else:
-                if x == 0:
+            if inp == 5:
+                move = 'r'
+            if view[1][2] == 'T' and axe == 1:
+                move = 'c'
+                raft = raft + 1
+            if view[1][2] == 'a' and axe == 0:
+                axe = 1
+                move = 'f'
+            if view[1][2] == 'k' and key == 0:
+                key = 1
+                move = 'f'
+            if view[1][2] == '-' and key == 1:
+                move = 'u'
+            if view[1][2] == 'o':
+                move = 'f'
+                stone = stone + 1
+            if view[1][2] == '*' or view[1][2]== '.':
+                print('case')
+                x = random.randrange(2)
+                if view[2][1] == '*':
+                    move = 'r'
+                elif view[2][3] == '*':
                     move = 'l'
                 else:
-                    move = 'r'
+                    if x == 0:
+                        move = 'l'
+                    else:
+                        move = 'r'
 
-        if view[1][2] == '~' and (stone > 0 or raft > 0) and move == 'f':
-            if stone > 0:
-                stone = stone - 1
-            else:
-                raft = raft - 1
-        #time.sleep(0.25)
-        return move
+            if view[1][2] == '~' and (stone > 0 or raft > 0) and move == 'f':
+                if stone > 0:
+                    stone = stone - 1
+                else:
+                    raft = raft - 1
+            #time.sleep(0.25)
+            return move
 
 def walkable(view,x,y):
     # find location of player
