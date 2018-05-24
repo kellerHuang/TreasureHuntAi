@@ -28,15 +28,7 @@ def get_action(view):
     ## REPLACE THIS WITH AI CODE TO CHOOSE ACTION ##
 
     # input loop to take input from user (only returns if this is valid)
-    # while 1:
-    #     inp = input("Enter Action(s): ")
-    #     inp.strip()
-    #     final_string = ''
-    #     for char in inp:
-    #         if char in ['f','l','r','c','u','b','F','L','R','C','U','B']:
-    #             final_string += char
-    #             if final_string:
-    #                  return final_string[0]
+
     global key
     global axe
     global stone
@@ -90,25 +82,27 @@ def walkable(view,x,y):
                 if check == '^':
                     if i < 4:
                         if test[i+1][j] in free:
-                            test[i+1][j] = test[i][j] + 'R'
+                            test[i+1][j] = test[i][j] + 'D'
                             change = 1
                     if i > 0:
                         if test[i-1][j] in free:
-                            test[i-1][j] = test[i][j] + 'L'
+                            test[i-1][j] = test[i][j] + 'U'
                             change = 1
                     if j < 4:
                         if test[i][j+1] in free:
-                            test[i][j+1] = test[i][j] + 'U'
+                            test[i][j+1] = test[i][j] + 'L'
                             change = 1
                     if j > 0:
                         if test[i][j-1] in free:
-                            test[i][j-1] = test[i][j] + 'D'
+                            test[i][j-1] = test[i][j] + 'R'
                             change = 1
     
-    if test[y][x] == '^':
-        return true
+    check = re.sub('[RLUD]','',test[y][x])
+    if check == '^':
+        return test[y][x]
     else:
-        return false
+        return 'false'
+
 # helper function to print the grid
 def print_grid(view):
     print('+-----+')
