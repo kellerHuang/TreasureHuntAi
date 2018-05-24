@@ -104,8 +104,6 @@ def walkable(view,x,y):
         return 'false'
 
 def rotate(dir, cur):
-    print(dir)
-    print(cur)
     if dir == cur:
         return ''
     if cur + 1 == dir:
@@ -124,7 +122,6 @@ def turnToPath(directions):
     facing = 0
     res = ''
     for i in arr:
-        print(i)
         if i == 'U':
             res = res + rotate(0,facing) + 'f'
             facing = 0
@@ -138,35 +135,6 @@ def turnToPath(directions):
             res = res + rotate(3,facing) + 'f'
             facing = 3
     return res
-    
-# rotates from current direction to desired direction
-def rotate(dir, cur):
-    if dir == cur:
-        return ''
-    if cur + 1 == dir:
-        return 'r'
-    if cur - 1 == dir:
-        return 'l'
-    if cur + 2 == dir or cur - 2 == dir:
-        return 'rr'
-    if cur - 3 == dir:
-        return 'r'
-
-def turnToPath(directions):
-    arr = list(directions.replace("^",""))
-    facing = 0
-    res = ''
-    for i in arr:
-        if i == 'U':
-            res = res + rotate(0,facing) + 'f'
-        if i == 'R':
-            res = res + rotate(1,facing) + 'f'
-        if i == 'D':
-            res = res + rotate(2,facing) + 'f'
-        if i == 'L':
-            res = res + rotate(3,facing) + 'f'
-    return res
-    
 
 # helper function to print the grid
 def print_grid(view):
