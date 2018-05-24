@@ -32,6 +32,20 @@ def get_action(view):
     global key
     global axe
     global stone
+    global raft
+    resources = {'o':'Rock','k':'Key','a':'Axe'}
+    low = 5
+    for i in range(5):
+        for j in range(5):
+            if view[i][j] in resources:
+                if abs(i - 1) + abs (j - 2) <= low:
+                    x = i
+                    y = j  
+                    low = abs(i-1) + abs(j-2) 
+    path = walkable(view,x,y)
+    path = path.split()
+    if path[0] != 'F':
+        return path[0]    
     while 1:
         inp = random.randrange(6)
         if inp < 4:
@@ -42,6 +56,7 @@ def get_action(view):
             move = 'r'
         if view[1][2] == 'T' and axe == 1:
             move = 'c'
+            raft = raft + 1
         if view[1][2] == 'a' and axe == 0:
             axe = 1
             move = 'f'
@@ -52,7 +67,7 @@ def get_action(view):
             move = 'u'
         if view[1][2] == 'o':
             move = 'f'
-            stone = stone+1
+            stone = stone + 1
         if view[1][2] == '*' or view[1][2]== '.':
             x = random.randrange(2)
             if view[2][1] == '*':
@@ -64,6 +79,12 @@ def get_action(view):
                     move = 'l'
                 else:
                     move = 'r'
+
+        if view[1][2] == '~' and (stone > 0 or raft > 0) and move == 'f':
+            if stone > 0:
+                stone = stone - 1
+            else:
+                raft = raft - 1
         #time.sleep(0.25)
         return move
 
@@ -101,7 +122,7 @@ def walkable(view,x,y):
     if check == '^':
         return turnToPath(test[y][x])
     else:
-        return 'false'
+        return 'False'
 
 def rotate(dir, cur):
     if dir == cur:
@@ -134,7 +155,9 @@ def turnToPath(directions):
         if i == 'L':
             res = res + rotate(3,facing) + 'f'
             facing = 3
-    return res
+    return res    
+# rotates from current direction to desired direction
+    
 
 # helper function to print the grid
 def print_grid(view):
