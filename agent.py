@@ -12,7 +12,7 @@ import sys
 import socket
 import random
 import time
-from copy import deepcopy
+import copy
 import re
 # declaring visible grid to agent
 view = [['' for _ in range(5)] for _ in range(5)]
