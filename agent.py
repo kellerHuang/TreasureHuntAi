@@ -34,24 +34,33 @@ def get_action(view):
     global stone
     global raft
     resources = {'o':'Rock','k':'Key','a':'Axe'}
-    if key > 0:
-        resources['-'] = 'Door'
     low = 5
     for i in range(5):
         for j in range(5):
             if view[i][j] in resources:
-                if abs(i - 1) + abs (j - 2) <= low:
+                if abs(i - 1) + abs (j - 2) < low:
                     x = i
                     y = j  
                     low = abs(i-1) + abs(j-2)
     print(1)
     try:
         path = walkable(view,y,x)
-        path = path.split()
-        if path[0] != 'F':
+        path1 = path.split()
+        if path1[0] != 'F':
             print(x)
             print(y)
             #time.sleep(1)
+            if view[1][2] == 'T' and axe == 1 and move == 'f':
+                raft = raft + 1
+                return 'c'
+            if view[1][2] == 'a' and axe == 0 and move == 'f':
+                axe = 1
+            if view[1][2] == 'k' and key == 0 and move == 'f':
+                key = 1
+            if view[1][2] == '-' and key == 1 and move == 'f':
+                return 'u'
+            if view[1][2] == 'o' and move == 'f':
+                stone = stone + 1
             return path[0]
     except NameError:
         while 1:
