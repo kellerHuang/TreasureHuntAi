@@ -34,18 +34,22 @@ def get_action(view):
     global stone
     global raft
     resources = {'o':'Rock','k':'Key','a':'Axe'} 
-    low = 5
+    if key > 0:
+        resources['-'] = 'Door'
+    if axe > 0:
+        resources['T'] = 'Tree'
+    low = 6
     for i in range(5):
         for j in range(5):
             if view[i][j] in resources:
                 if abs(i - 1) + abs (j - 2) < low:
-                    x = i
-                    y = j  
+                    y = i
+                    x = j  
                     low = abs(i-1) + abs(j-2)
     print(1)
     print(resources)
     try:
-        path = walkable(view,y,x)
+        path = walkable(view,x,y)
         path1 = list(path)
         if path1[0] != 'F':
             print(x)
@@ -90,7 +94,7 @@ def get_action(view):
             if view[1][2] == 'o':
                 move = 'f'
                 stone = stone + 1
-            if view[1][2] == '*' or view[1][2]== '.':
+            if view[1][2] == '*' or view[1][2]== '.' or (view[1][2] == '~' and (stone == 0 and raft == 0)):
                 print('case')
                 x = random.randrange(2)
                 if view[2][1] == '*':
@@ -116,8 +120,11 @@ def walkable(view,x,y):
     # find location of player
     test = copy.deepcopy(view)
     change = 1
-    free = {'o':'Rock','k':'Key','a':'Axe',' ':'Space'}
-    
+    free = {'o':'Stone','k':'Key','a':'Axe',' ':'Space', 'O':'placed_Stone'}
+    if key == 1:
+        free['-'] = 'Door'
+    if axe == 1:
+        free['T'] = 'Tree'
     test[2][2] = '^'
     while change == 1:
         change = 0
