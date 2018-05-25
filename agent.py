@@ -45,6 +45,7 @@ def get_action(view):
                     y = j  
                     low = abs(i-1) + abs(j-2)
     print(1)
+    print(resources)
     try:
         path = walkable(view,y,x)
         path = path.split()
@@ -52,6 +53,14 @@ def get_action(view):
             print(x)
             print(y)
             #time.sleep(1)
+            #increments resources
+            if(path[0] == 'f'):
+                if(view[1][2] == 'o'):
+                    stone = stone + 1
+                if(view[1][2] == 'k'):
+                    key = 1
+                if(view[1][2] == 'a'):
+                    axe = 1
             return path[0]
     except NameError:
         while 1:
