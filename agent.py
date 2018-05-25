@@ -21,14 +21,52 @@ stone = 0
 axe = 0
 raft = 0
 key = 0
+orientation = 0
 
+moves = []
+def rotateMatrix(mat):   
+    # Consider all squares one by one
+    for x in range(0, int(5/2)):
+    # Consider elements in group   
+    # of 4 in current square
+        for y in range(x, 5-x-1):
+            # store current cell in temp variable
+            temp = mat[x][y]
+            # move values from right to top
+            mat[x][y] = mat[y][5-1-x]
+            # move values from bottom to right
+            mat[y][5-1-x] = mat[5-1-x][5-1-y]
+            # move values from left to bottom
+            mat[5-1-x][5-1-y] = mat[5-1-y][x]
+            # assign temp to left
+            mat[5-1-y][x] = temp
+    
 # function to take get action from AI or user
 def get_action(view):
+    orientation = 0
+    global moves
 
-    ## REPLACE THIS WITH AI CODE TO CHOOSE ACTION ##
-
-    # input loop to take input from user (only returns if this is valid)
-
+    for i in moves:
+        if i == 'l':
+            orientation = (orientation - 1) % 4
+        if i == 'r':
+            orientation = (orientation + 1) % 4
+    rotate = copy.deepcopy(view)
+    turns = 4 - orientation
+    while turns > 0:
+        rotateMatrix(rotate)
+        turns = turns - 1
+    if orientation == 0:
+        rotate[2][2] = '^'
+    elif orientation == 1:
+        rotate[2][2] = '>'
+    elif orientation == 2:
+        rotate[2][2] = 'v'
+    else:
+        rotate[2][2] = '<'
+    print_grid(rotate)
+    print('------')
+    
     global key
     global axe
     global stone
@@ -56,18 +94,21 @@ def get_action(view):
             print(y)
             print(path)
             print(path1[0])
-            #time.sleep(1)
+            time.sleep(2)
             if view[1][2] == 'T' and axe == 1 and move == 'f':
                 raft = raft + 1
+                moves.append['c']
                 return 'c'
             if view[1][2] == 'a' and axe == 0 and move == 'f':
                 axe = 1
             if view[1][2] == 'k' and key == 0 and move == 'f':
                 key = 1
             if view[1][2] == '-' and key == 1 and move == 'f':
+                moves.append['u']
                 return 'u'
             if view[1][2] == 'o' and move == 'f':
                 stone = stone + 1
+            moves.append(path[0])
             return path[0]
         raise NameError
     except NameError:
@@ -95,7 +136,7 @@ def get_action(view):
                 move = 'f'
                 stone = stone + 1
             if view[1][2] == '*' or view[1][2]== '.' or (view[1][2] == '~' and (stone == 0 and raft == 0)):
-                print('case')
+                print('O a wall')
                 x = random.randrange(2)
                 if view[2][1] == '*':
                     move = 'r'
@@ -112,7 +153,8 @@ def get_action(view):
                     stone = stone - 1
                 else:
                     raft = raft - 1
-            #time.sleep(1)
+            time.sleep(2)
+            moves.append(move)
             return move
 
 
