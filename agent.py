@@ -34,17 +34,21 @@ def get_action(view):
     global stone
     global raft
     resources = {'o':'Rock','k':'Key','a':'Axe'} 
+    if key == 1:
+        resources['-'] = 'Door'
     low = 5
     for i in range(5):
         for j in range(5):
             if view[i][j] in resources:
-                if abs(i - 1) + abs (j - 2) < low:
+                if abs(i - 1) + abs (j - 2) <= low:
                     x = i
                     y = j  
                     low = abs(i-1) + abs(j-2)
+                print('found')
     print(1)
     print(resources)
     try:
+        print('called')
         path = walkable(view,y,x)
         path1 = list(path)
         if path1[0] != 'F':
@@ -117,7 +121,8 @@ def walkable(view,x,y):
     test = copy.deepcopy(view)
     change = 1
     free = {'o':'Rock','k':'Key','a':'Axe',' ':'Space'}
-    
+    if key == 1:
+        free['-'] = 'Door'
     test[2][2] = '^'
     while change == 1:
         change = 0
