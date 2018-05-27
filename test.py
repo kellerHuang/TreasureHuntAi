@@ -98,9 +98,12 @@ def addView(view,x,y):
             for i in range(5):
                 # replace squares
                 allview[playery - 2 + i][playerx + 3] = view[i][4]
-            # change player location 
-            # TODO change so that rocks and rafts can be found
-            allview[playery][playerx] = ' '
+            # change player location
+            if view[2][1] == 'o':
+                allview[playery][playerx] = 'o'
+            else:                 
+            # change so that rocks can be found
+                allview[playery][playerx] = ' '
             allview[y][x] = '>'
             # updates to playerx and playery
             playerx = playerx + 1
@@ -121,9 +124,12 @@ def addView(view,x,y):
                 # replace squares
                 allview[playery-2+i][playerx - 3] = view[i][0]
             # change player location
-            # TODO same as other todos
+            if view[2][3] == 'o':
+                allview[playery][playerx] = 'o'                 
+            # checks if previous step is stone
+            else:
             # moved playerx to account for new column
-            allview[playery][playerx] = ' '
+                allview[playery][playerx] = ' '
             allview[y][x+1] = '<'
             playerx = playerx - 1
             printDebug(x,y)
@@ -144,8 +150,11 @@ def addView(view,x,y):
                 # replace squares
                 allview[playery + 3][playerx - 2 + i] = view[4][i]
             # change player location 
-            # TODO change so that rocks and rafts can be found
-            allview[playery][playerx] = ' '
+            if view[1][2] == 'o':
+                allview[playery][playerx] = 'o'                 
+            # change so that rocks can be found
+            else:
+                allview[playery][playerx] = ' '
             allview[y][x] = 'v'
             # updates to playerx and playery
             playery = playery + 1
@@ -166,16 +175,44 @@ def addView(view,x,y):
                 # replace squares
                 allview[playery - 3][playerx - 2 + i] = view[0][i]
             # change player location
-            # TODO same as other todos
+            if view[3][2] == 'o':
+                allview[playery][playerx] = 'o'                 
+            # check if previous step was on a stone
+            else:
             # moved playerx to account for new column
-            allview[playery][playerx] = ' '
+                allview[playery][playerx] = ' '
             playery = playery - 1
             allview[playery][playerx] = '^'
             printDebug(x,y)
         
     # no view to add
     else:
-        pass
+    #check what orientation you are in
+    #look at the respective cell in view to see the cell that may have had an action taken
+    #crossreference with the allview to see what changes have been made
+    #update the changes
+        if playerOri == '^':
+            if view[1][2] == ' ' and allview[playery-1][playerx] == '-':
+                allview[playery-1][playerx] == ' '
+            elif view[1][2] == ' ' and allview[playery-1][playerx] == 'T':
+                allview[playery-1][playerx] == ' ' 
+        elif playerOri == 'v':
+            if view[3][2] == ' ' and allview[playery+1][playerx] == '-':
+                allview[playery+1][playerx] == ' '
+            elif view[3][2] == ' ' and allview[playery+1][playerx] == 'T':
+                allview[playery+1][playerx] == ' '
+        elif playerOri == '<':
+            if view[2][1] == ' ' and allview[playery][playerx-1] == '-':
+                allview[playery][playerx-1] == ' '
+            elif view[2][1] == ' ' and allview[playery][playerx-1] == 'T':
+                allview[playery][playerx-1] == ' '
+        elif playerOri == '^':
+            if view[2][3] == ' ' and allview[playery][player+1] == '-':
+                allview[playery][playerx+1] == ' '
+            elif view[2][3] == ' ' and allview[playery][playerx+1] == 'T':
+                allview[playery][playerx+1] == ' '
+        else:
+            pass
 
 # a helper function to find the location of the player
 def findPlayer(map):
