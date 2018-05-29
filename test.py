@@ -99,8 +99,8 @@ def addView(view,x,y):
                 # replace squares
                 allview[playery - 2 + i][playerx + 3] = view[i][4]
             # change player location
-            if view[2][1] == 'o':
-                allview[playery][playerx] = 'o'
+            if view[2][1] == 'O':
+                allview[playery][playerx] = 'O'
             else:                 
             # change so that rocks can be found
                 allview[playery][playerx] = ' '
@@ -124,8 +124,8 @@ def addView(view,x,y):
                 # replace squares
                 allview[playery-2+i][playerx - 3] = view[i][0]
             # change player location
-            if view[2][3] == 'o':
-                allview[playery][playerx] = 'o'                 
+            if view[2][3] == 'O':
+                allview[playery][playerx] = 'O'                 
             # checks if previous step is stone
             else:
             # moved playerx to account for new column
@@ -150,8 +150,8 @@ def addView(view,x,y):
                 # replace squares
                 allview[playery + 3][playerx - 2 + i] = view[4][i]
             # change player location 
-            if view[1][2] == 'o':
-                allview[playery][playerx] = 'o'                 
+            if view[1][2] == 'O':
+                allview[playery][playerx] = 'O'                 
             # change so that rocks can be found
             else:
                 allview[playery][playerx] = ' '
@@ -175,8 +175,8 @@ def addView(view,x,y):
                 # replace squares
                 allview[playery - 3][playerx - 2 + i] = view[0][i]
             # change player location
-            if view[3][2] == 'o':
-                allview[playery][playerx] = 'o'                 
+            if view[3][2] == 'O':
+                allview[playery][playerx] = 'O'                 
             # check if previous step was on a stone
             else:
             # moved playerx to account for new column
@@ -207,7 +207,7 @@ def addView(view,x,y):
             elif view[2][1] == ' ' and allview[playery][playerx-1] == 'T':
                 allview[playery][playerx-1] == ' '
         elif playerOri == '^':
-            if view[2][3] == ' ' and allview[playery][player+1] == '-':
+            if view[2][3] == ' ' and allview[playery][playerx+1] == '-':
                 allview[playery][playerx+1] == ' '
             elif view[2][3] == ' ' and allview[playery][playerx+1] == 'T':
                 allview[playery][playerx+1] == ' '

@@ -14,14 +14,30 @@ import random
 import time
 import copy
 import re
+
 # declaring visible grid to agent
 view = [['' for _ in range(5)] for _ in range(5)]
-
+allview = [[]]
 stone = 0
 axe = 0
 raft = 0
 key = 0
 orientation = 0
+# curr is a rotated view
+# a and b are the x and y co-ordinates of the middle tile of the view
+
+# currview is the current whole map view
+# currx and curry are the dimensions of our current mapview (last index notation)
+currx = 4
+curry = 4
+# size of map (defined as currx + 1 and curry + 1 respectively)
+sizex = 5
+sizey = 5
+# player x and player y are the player location in our current all view
+playerx = 2
+playery = 2
+# player orientation
+playerOri = '^'
 
 moves = []
 def rotateMatrix(mat):   
@@ -66,7 +82,20 @@ def get_action(view):
         rotate[2][2] = '<'
     print_grid(rotate)
     print('------')
-    
+    global playerx
+    global playery
+    if moves != [] and moves[-1] == 'f':
+        if orientation == 0:
+            addView(rotate,playerx,playery-1)
+        elif orientation == 1:
+            addView(rotate,playerx+1,playery)
+        elif orientation == 2:
+            addView(rotate,playerx,playery+1)
+        else:
+            addView(rotate,playerx-1,playery)
+    else:
+        addView(rotate,playerx,playery)
+    printMap(allview)
     global key
     global axe
     global stone
@@ -84,7 +113,6 @@ def get_action(view):
                     y = i
                     x = j  
                     low = abs(i-1) + abs(j-2)
-    print(1)
     print(resources)
     try:
         path = walkable(view,x,y)
@@ -94,17 +122,17 @@ def get_action(view):
             print(y)
             print(path)
             print(path1[0])
-            time.sleep(2)
+            time.sleep(0.5)
             if view[1][2] == 'T' and axe == 1 and move == 'f':
                 raft = raft + 1
-                moves.append['c']
+                moves.append('c')
                 return 'c'
             if view[1][2] == 'a' and axe == 0 and move == 'f':
                 axe = 1
             if view[1][2] == 'k' and key == 0 and move == 'f':
                 key = 1
             if view[1][2] == '-' and key == 1 and move == 'f':
-                moves.append['u']
+                moves.append('u')
                 return 'u'
             if view[1][2] == 'o' and move == 'f':
                 stone = stone + 1
@@ -153,7 +181,7 @@ def get_action(view):
                     stone = stone - 1
                 else:
                     raft = raft - 1
-            time.sleep(2)
+            time.sleep(0.5)
             moves.append(move)
             return move
 
@@ -238,6 +266,194 @@ def print_grid(view):
     for ln in view:
         print("|"+str(ln[0])+str(ln[1])+str(ln[2])+str(ln[3])+str(ln[4])+"|")
     print('+-----+')
+
+# function that gets given the view and the new x and y location of the player 
+# with respect to the old map that is to be replaced
+def addView(view,x,y):
+    global playerx
+    global playery
+    global currx
+    global curry
+    global allview
+    global sizex
+    global sizey
+    if allview == [[]]:
+        allview = copy.deepcopy(view)
+        return
+    findPlayer(allview)
+    # horizontal move
+    if x != playerx:
+
+        # move right
+        if x > playerx:
+            print('right')
+            # check if allview needs to be expanded
+            if x + 2 > currx:
+                # initiate new squares created with '?'
+                allview = [m + ['?'] for m in allview]
+                currx = currx + 1
+                sizex = sizex + 1
+            # check allview and replace squares since replacing older squares dont matter for correctness
+            for i in range(5):
+                # replace squares
+                allview[playery - 2 + i][playerx + 3] = view[i][4]
+            # change player location
+            if view[2][1] == 'O':
+                allview[playery][playerx] = 'O'
+            else:                 
+            # change so that rocks can be found
+                allview[playery][playerx] = ' '
+            allview[y][x] = '>'
+            # updates to playerx and playery
+            playerx = playerx + 1
+                
+        # move left
+        else:
+            print('left')
+            # check if allview needs to be expanded
+            if x - 2 < 0:
+                # initiate new squares created with '?'
+                allview = addStartColumn(allview,sizex,sizey)
+                playerx = playerx + 1
+                currx = currx + 1
+                sizex = sizex + 1
+            # check allview and replace squares since replacing older squares dont matter for correctness
+            for i in range(5):
+                # replace squares
+                allview[playery-2+i][playerx - 3] = view[i][0]
+            # change player location
+            if view[2][3] == 'O':
+                allview[playery][playerx] = 'O'                 
+            # checks if previous step is stone
+            else:
+            # moved playerx to account for new column
+                allview[playery][playerx] = ' '
+            allview[y][x+1] = '<'
+            playerx = playerx - 1
+
+    # vertical move
+    elif y != playery:
+        # move down
+        if y > playery:
+            print('down')
+            # check if allview needs to be expanded
+            if y + 2 > curry:
+                # initiate new squares created with '?'
+                allview = allview + [['?' for i in range(sizex)]]
+                curry = curry + 1
+                sizey = sizey + 1
+            # check allview and replace squares since replacing older squares dont matter for correctness
+            for i in range(5):
+                # replace squares
+                allview[playery + 3][playerx - 2 + i] = view[4][i]
+            # change player location 
+            if view[1][2] == 'O':
+                allview[playery][playerx] = 'O'                 
+            # change so that rocks can be found
+            else:
+                allview[playery][playerx] = ' '
+            allview[y][x] = 'v'
+            # updates to playerx and playery
+            playery = playery + 1
+        # move up
+        else:
+            print('up')
+            # check if allview needs to be expanded
+            if y - 2 < 0:
+                # initiate new squares created with '?'
+                allview = addStartRow(allview,sizex,sizey)
+                # adjust playery to account for extra row 
+                playery = playery + 1
+                curry = curry + 1
+                sizey = sizey + 1
+            # check allview and replace squares since replacing older squares dont matter for correctness
+            for i in range(5):
+                # replace squares
+                allview[playery - 3][playerx - 2 + i] = view[0][i]
+            # change player location
+            if view[3][2] == 'O':
+                allview[playery][playerx] = 'O'                 
+            # check if previous step was on a stone
+            else:
+            # moved playerx to account for new column
+                allview[playery][playerx] = ' '
+            playery = playery - 1
+            allview[playery][playerx] = '^'
+        
+    # no view to add
+    else:
+    #check what orientation you are in
+    #look at the respective cell in view to see the cell that may have had an action taken
+    #crossreference with the allview to see what changes have been made
+    #update the changes
+        if playerOri == '^':
+            if view[1][2] == ' ' and allview[playery-1][playerx] == '-':
+                allview[playery-1][playerx] == ' '
+            elif view[1][2] == ' ' and allview[playery-1][playerx] == 'T':
+                allview[playery-1][playerx] == ' ' 
+        elif playerOri == 'v':
+            if view[3][2] == ' ' and allview[playery+1][playerx] == '-':
+                allview[playery+1][playerx] == ' '
+            elif view[3][2] == ' ' and allview[playery+1][playerx] == 'T':
+                allview[playery+1][playerx] == ' '
+        elif playerOri == '<':
+            if view[2][1] == ' ' and allview[playery][playerx-1] == '-':
+                allview[playery][playerx-1] == ' '
+            elif view[2][1] == ' ' and allview[playery][playerx-1] == 'T':
+                allview[playery][playerx-1] == ' '
+        elif playerOri == '^':
+            if view[2][3] == ' ' and allview[playery][playerx+1] == '-':
+                allview[playery][playerx+1] == ' '
+            elif view[2][3] == ' ' and allview[playery][playerx+1] == 'T':
+                allview[playery][playerx+1] == ' '
+        else:
+            pass
+
+# a helper function to find the location of the player
+def findPlayer(map):
+    global playerx
+    global playery
+    global currx
+    global curry
+    global playerOri
+    player = {'<':'left','v':'down','>':'right','^':'up'}
+
+    for i in range(sizex):
+        for j in range(sizey):
+            if map[j][i] in player:
+                playerx = i
+                playery = j
+                playerOri = map[j][i]
+                return
+
+# given a matrix and its current size, adds a '?' initiated column on x = 0
+def addStartColumn(view,x,y):
+    newview = copy.deepcopy(view)
+    newview = [x + ['err'] for x in newview]
+    for i in range(x):
+        for j in range(y):
+            newview[j][i+1] = view[j][i]
+    for m in range(y):
+        newview[m][0] = '?'
+    return newview
+
+# given a matrix and its current size, adds a '?' initiated row at the start
+def addStartRow(view,x,y):
+    newview = copy.deepcopy(view)
+    newview = newview + [['?' for i in range(x)]]
+    for i in range(x):
+        for j in range(y):
+            newview[j+1][i] = view[j][i]
+    for m in range(x):
+        newview[0][m] = '?'
+    return newview
+
+# a function to print any map (function strictly for testing)
+def printMap(view):
+    for i in view:
+        for j in i:
+            print('[' + j + ']',end='')
+        print()
 
 if __name__ == "__main__":
 
