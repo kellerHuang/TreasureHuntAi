@@ -18,6 +18,8 @@ import re
 # declaring visible grid to agent
 view = [['' for _ in range(5)] for _ in range(5)]
 allview = [[]]
+#2d matrix representing where we have been
+exploreview = [[]]
 stone = 0
 axe = 0
 raft = 0
@@ -96,6 +98,8 @@ def get_action(view):
     else:
         addView(rotate,playerx,playery)
     printMap(allview)
+    print("------------------")
+    printMap(exploreview)
     global key
     global axe
     global stone
@@ -126,6 +130,7 @@ def get_action(view):
             if view[1][2] == 'T' and axe == 1 and move == 'f':
                 raft = raft + 1
                 moves.append('c')
+                exploreview[playery][playerx] = 'v' #set current position to visited. This happens before every move return.
                 return 'c'
             if view[1][2] == 'a' and axe == 0 and move == 'f':
                 axe = 1
@@ -133,10 +138,12 @@ def get_action(view):
                 key = 1
             if view[1][2] == '-' and key == 1 and move == 'f':
                 moves.append('u')
+                explore[playery][playerx] = 'v'
                 return 'u'
             if view[1][2] == 'o' and move == 'f':
                 stone = stone + 1
             moves.append(path[0])
+            exploreview[playery][playerx] = 'v' #set position to visited
             return path[0]
         raise NameError
     except NameError:
@@ -183,6 +190,7 @@ def get_action(view):
                     raft = raft - 1
             time.sleep(0.5)
             moves.append(move)
+            exploreview[playery][playerx] = 'v' #set position to visited
             return move
 
 
@@ -275,10 +283,18 @@ def addView(view,x,y):
     global currx
     global curry
     global allview
+    global exploreview
     global sizex
     global sizey
     if allview == [[]]:
         allview = copy.deepcopy(view)
+        exploreview = copy.deepcopy(view) #copy the initial 5x5 view 
+        for i in range(5):
+            for k in range(5):
+                if exploreview[i][j] == '*': #if the cell is a wall
+                    exploreview[i][j] == 'v' #mark it as visited
+                else:
+                    exploreview[i][j] == ' ' #all other cells are unvisited
         return
     findPlayer(allview)
     # horizontal move
@@ -291,12 +307,17 @@ def addView(view,x,y):
             if x + 2 > currx:
                 # initiate new squares created with '?'
                 allview = [m + ['?'] for m in allview]
+                exploreview = [n + [' '] for n in exploreview] #extend the matrix with spaces
                 currx = currx + 1
                 sizex = sizex + 1
             # check allview and replace squares since replacing older squares dont matter for correctness
             for i in range(5):
                 # replace squares
                 allview[playery - 2 + i][playerx + 3] = view[i][4]
+                if view[i][4] == '*': #if the new cell being added is a wall
+                    exploreview[playery - 2 + i][playerx + 3] = 'v' #mark it as visited
+                else:
+                    exploreview[playery - 2 + 1][playerx + 3] = ' ' #otherwise mark it as unvisited               
             # change player location
             if view[2][1] == 'O':
                 allview[playery][playerx] = 'O'
@@ -314,6 +335,9 @@ def addView(view,x,y):
             if x - 2 < 0:
                 # initiate new squares created with '?'
                 allview = addStartColumn(allview,sizex,sizey)
+                exploreview = addStartColumn(exploreview,sizex,sizey)
+                #TODO TURN THE ? INTO ' '
+                #^^^^^^^^^^^^^^^^^^^^^^^^    
                 playerx = playerx + 1
                 currx = currx + 1
                 sizex = sizex + 1
@@ -321,6 +345,10 @@ def addView(view,x,y):
             for i in range(5):
                 # replace squares
                 allview[playery-2+i][playerx - 3] = view[i][0]
+                if view[i][0] == '*': #same as above
+                    exploreview[playery - 2 + i][playerx - 3] = 'v'
+                else:
+                    exploreview[playery - 2 + 1][playerx - 3] = ' '                
             # change player location
             if view[2][3] == 'O':
                 allview[playery][playerx] = 'O'                 
@@ -340,12 +368,17 @@ def addView(view,x,y):
             if y + 2 > curry:
                 # initiate new squares created with '?'
                 allview = allview + [['?' for i in range(sizex)]]
+                exploreview = exploreview + [[' ' for j in range(sizex)]] #initialise the new cells into spaces
                 curry = curry + 1
                 sizey = sizey + 1
             # check allview and replace squares since replacing older squares dont matter for correctness
             for i in range(5):
                 # replace squares
                 allview[playery + 3][playerx - 2 + i] = view[4][i]
+                if view[4][i] == '*': #same as above
+                    exploreview[playery + 3][playerx - 2 + i] = 'v'
+                else:
+                    exploreview[playery + 3][playerx - 2 + i] = ' '                
             # change player location 
             if view[1][2] == 'O':
                 allview[playery][playerx] = 'O'                 
@@ -362,7 +395,9 @@ def addView(view,x,y):
             if y - 2 < 0:
                 # initiate new squares created with '?'
                 allview = addStartRow(allview,sizex,sizey)
-                # adjust playery to account for extra row 
+                exploreview = addStartRow(exploreview,sizex,sizey)
+                # TODO TURN THE ? into ' '
+                # ^^^^^^^^^^^^^^^^^^^^^^^^^^ 
                 playery = playery + 1
                 curry = curry + 1
                 sizey = sizey + 1
@@ -370,6 +405,10 @@ def addView(view,x,y):
             for i in range(5):
                 # replace squares
                 allview[playery - 3][playerx - 2 + i] = view[0][i]
+                if view[4][i] == '*': #same as above
+                    exploreview[playery - 3][playerx - 2 + i] = 'v'
+                else:
+                    exploreview[playery - 3][playerx - 2 + i] = ' '                
             # change player location
             if view[3][2] == 'O':
                 allview[playery][playerx] = 'O'                 
@@ -391,7 +430,7 @@ def addView(view,x,y):
                 allview[playery-1][playerx] == ' '
             elif view[1][2] == ' ' and allview[playery-1][playerx] == 'T':
                 allview[playery-1][playerx] == ' ' 
-        elif playerOri == 'v':
+        elif playerOri == 'v': 
             if view[3][2] == ' ' and allview[playery+1][playerx] == '-':
                 allview[playery+1][playerx] == ' '
             elif view[3][2] == ' ' and allview[playery+1][playerx] == 'T':
