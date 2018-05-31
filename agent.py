@@ -290,7 +290,7 @@ def addView(view,x,y):
         allview = copy.deepcopy(view)
         exploreview = copy.deepcopy(view) #copy the initial 5x5 view 
         for i in range(5):
-            for k in range(5):
+            for j in range(5):
                 if exploreview[i][j] == '*': #if the cell is a wall
                     exploreview[i][j] == 'v' #mark it as visited
                 else:
@@ -334,8 +334,8 @@ def addView(view,x,y):
             # check if allview needs to be expanded
             if x - 2 < 0:
                 # initiate new squares created with '?'
-                allview = addStartColumn(allview,sizex,sizey)
-                exploreview = addStartColumn(exploreview,sizex,sizey)
+                allview = addStartColumn(allview,sizex,sizey,'?')
+                exploreview = addStartColumn(exploreview,sizex,sizey,' ')
                 #TODO TURN THE ? INTO ' '
                 #^^^^^^^^^^^^^^^^^^^^^^^^    
                 playerx = playerx + 1
@@ -394,8 +394,8 @@ def addView(view,x,y):
             # check if allview needs to be expanded
             if y - 2 < 0:
                 # initiate new squares created with '?'
-                allview = addStartRow(allview,sizex,sizey)
-                exploreview = addStartRow(exploreview,sizex,sizey)
+                allview = addStartRow(allview,sizex,sizey,'?')
+                exploreview = addStartRow(exploreview,sizex,sizey,' ')
                 # TODO TURN THE ? into ' '
                 # ^^^^^^^^^^^^^^^^^^^^^^^^^^ 
                 playery = playery + 1
@@ -466,25 +466,25 @@ def findPlayer(map):
                 return
 
 # given a matrix and its current size, adds a '?' initiated column on x = 0
-def addStartColumn(view,x,y):
+def addStartColumn(view,x,y,ini):
     newview = copy.deepcopy(view)
     newview = [x + ['err'] for x in newview]
     for i in range(x):
         for j in range(y):
             newview[j][i+1] = view[j][i]
     for m in range(y):
-        newview[m][0] = '?'
+        newview[m][0] = ini
     return newview
 
 # given a matrix and its current size, adds a '?' initiated row at the start
-def addStartRow(view,x,y):
+def addStartRow(view,x,y,ini):
     newview = copy.deepcopy(view)
-    newview = newview + [['?' for i in range(x)]]
+    newview = newview + [['err' for i in range(x)]]
     for i in range(x):
         for j in range(y):
             newview[j+1][i] = view[j][i]
     for m in range(x):
-        newview[0][m] = '?'
+        newview[0][m] = ini
     return newview
 
 # a function to print any map (function strictly for testing)
