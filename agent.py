@@ -118,6 +118,9 @@ def get_action(view):
                     x = j  
                     low = abs(i-1) + abs(j-2)
     #print(resources)
+    print("ANALYSIS")
+    printMap(analyse())
+    print("ANALYSIS")
     try:
         path = walkable(view,x,y)
         path1 = list(path)
@@ -222,12 +225,70 @@ def walkable(view,x,y):
                         if test[i][j-1] in free:
                             test[i][j-1] = test[i][j] + 'L'
                             change = 1
-    
     check = re.sub('[RLUD]','',test[y][x])
     if check == '^':
         return turnToPath(test[y][x])
     else:
         return 'False'
+
+# Similar to walkable but specifically for allview/exploreview
+def walkableView():
+    # find location of player
+    test = copy.deepcopy(allview)
+    change = 1
+    free = {'o':'Stone','k':'Key','a':'Axe',' ':'Space', 'O':'placed_Stone'}
+    if key == 1:
+        free['-'] = 'Door'
+    if axe == 1:
+        free['T'] = 'Tree'
+    while change == 1:
+        change = 0
+        for i in range(sizey):
+            for j in range(sizex):
+                check = re.sub('[RLUD]','',test[i][j])
+                if check == '^':
+                    if i < 4:
+                        if test[i+1][j] in free:
+                            test[i+1][j] = test[i][j] + 'D'
+                            change = 1
+                    if i > 0:
+                        if test[i-1][j] in free:
+                            test[i-1][j] = test[i][j] + 'U'
+                            change = 1
+                    if j < 4:
+                        if test[i][j+1] in free:
+                            test[i][j+1] = test[i][j] + 'R'
+                            change = 1
+                    if j > 0:
+                        if test[i][j-1] in free:
+                            test[i][j-1] = test[i][j] + 'L'
+                            change = 1
+    # run once again but for '?'
+    free['?'] = 'unknown'
+    for i in range(sizey):
+        for j in range(sizex):
+            check = re.sub('[RLUD]','',test[i][j])
+            if check == '^':
+                if i < 4:
+                    if test[i+1][j] in free:
+                        test[i+1][j] = test[i][j] + 'D'
+                if i > 0:
+                    if test[i-1][j] in free:
+                        test[i-1][j] = test[i][j] + 'U'
+                if j < 4:
+                    if test[i][j+1] in free:
+                        test[i][j+1] = test[i][j] + 'R'
+                if j > 0:
+                    if test[i][j-1] in free:
+                        test[i][j-1] = test[i][j] + 'L'
+    for i in range(sizey):
+        for j in range(sizex):
+            if test[i][j].startswith('^'):
+                test[i][j] = turnToPath(test[i][j])
+            else:
+                test[i][j] = 'F'
+    return test
+
 
 def rotate(dir, cur):
     if dir == cur:
@@ -487,9 +548,65 @@ def addStartRow(view,x,y,ini):
 def printMap(view):
     for i in view:
         for j in i:
-            print('[' + j + ']',end='')
+            print('[' + str(j) + ']',end='')
         print()
 
+# a function to check entropy values of walkable areas
+def analyse():
+    test = copy.deepcopy(allview)
+    for i in range(sizey):
+        for j in range(sizex):
+            entropy = 0
+            # get bounds on where to search
+            if i < 2:
+                # need to search from 0 to i + 2
+                iLBound = 0
+                iHBound = i + 2
+            elif i > sizey - 3:
+                # need to search from i-2 to sizey - 1
+                iLBound = i - 2
+                iHBound = sizey - 1
+            else:
+                # need to search from i-2 to i+2
+                iLBound = i - 2
+                iHBound = i + 2
+            if j < 2:
+                # need to search from 0 to j + 2
+                jLBound = 0
+                jHBound = j + 2
+            elif j > sizex - 3:
+                # need to search from j - 2 to sizex - 1
+                jLBound = j - 2
+                jHBound = sizex - 1
+            else:
+                # need to search from j - 2 to j + 2
+                jLBound = j - 2
+                jHBound = j + 2
+            
+            for y in range(iHBound - iLBound + 1):
+                for x in range(jHBound - jLBound + 1):
+                    if allview[iLBound + y][jLBound + x] == '?':
+                        entropy = entropy + 1
+            
+            # calculate excess not in map
+            excessY = 5 - (iHBound - iLBound + 1) 
+            excessX = 5 - (jHBound - jLBound + 1)
+            if excessX == 0 and excessY != 0:
+                entropy = entropy + excessY * 5
+            elif excessY == 0 and excessX != 0:
+                entropy = entropy + excessX * 5
+            elif excessX != 0 and excessY != 0:
+                entropy = entropy + excessX * 5 + excessY * 5 - excessX * excessY
+            else:
+                pass
+
+            test[i][j] = entropy
+    return test
+
+            
+            
+
+            
 if __name__ == "__main__":
 
     # checks for correct amount of arguments 
