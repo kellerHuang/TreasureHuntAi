@@ -82,8 +82,8 @@ def get_action(view):
         rotate[2][2] = 'v'
     else:
         rotate[2][2] = '<'
-    print_grid(rotate)
-    print('------')
+    #print_grid(rotate)
+    #print('------')
     global playerx
     global playery
     if moves != [] and moves[-1] == 'f':
@@ -117,16 +117,12 @@ def get_action(view):
                     y = i
                     x = j  
                     low = abs(i-1) + abs(j-2)
-    print(resources)
+    #print(resources)
     try:
         path = walkable(view,x,y)
         path1 = list(path)
         if path1[0] != 'F':
-            print(x)
-            print(y)
-            print(path)
-            print(path1[0])
-            time.sleep(0.5)
+            time.sleep(0.25)
             if view[1][2] == 'T' and axe == 1 and move == 'f':
                 raft = raft + 1
                 moves.append('c')
@@ -188,7 +184,7 @@ def get_action(view):
                     stone = stone - 1
                 else:
                     raft = raft - 1
-            time.sleep(0.5)
+            time.sleep(0.25)
             moves.append(move)
             exploreview[playery][playerx] = 'v' #set position to visited
             return move
@@ -292,7 +288,7 @@ def addView(view,x,y):
         for i in range(5):
             for j in range(5):
                 if exploreview[i][j] == '*': #if the cell is a wall
-                    exploreview[i][j] == 'v' #mark it as visited
+                    exploreview[i][j] = 'v' #mark it as visited
                 else:
                     exploreview[i][j] == ' ' #all other cells are unvisited
         return
@@ -314,7 +310,7 @@ def addView(view,x,y):
             for i in range(5):
                 # replace squares
                 allview[playery - 2 + i][playerx + 3] = view[i][4]
-                if view[i][4] == '*': #if the new cell being added is a wall
+                if view[i][4] == '*' or exploreview[playery - 2 + i][playerx + 3] == 'v': #if the new cell being added is a wall
                     exploreview[playery - 2 + i][playerx + 3] = 'v' #mark it as visited
                 else:
                     exploreview[playery - 2 + 1][playerx + 3] = ' ' #otherwise mark it as unvisited               
@@ -337,7 +333,7 @@ def addView(view,x,y):
                 allview = addStartColumn(allview,sizex,sizey,'?')
                 exploreview = addStartColumn(exploreview,sizex,sizey,' ')
                 #TODO TURN THE ? INTO ' '
-                #^^^^^^^^^^^^^^^^^^^^^^^^    
+                #^^^^^^^^^^^^^^^^^^^^^^^^
                 playerx = playerx + 1
                 currx = currx + 1
                 sizex = sizex + 1
@@ -345,7 +341,7 @@ def addView(view,x,y):
             for i in range(5):
                 # replace squares
                 allview[playery-2+i][playerx - 3] = view[i][0]
-                if view[i][0] == '*': #same as above
+                if view[i][0] == '*' or exploreview[playery - 2 + i][playerx - 3] == 'v': #same as above
                     exploreview[playery - 2 + i][playerx - 3] = 'v'
                 else:
                     exploreview[playery - 2 + 1][playerx - 3] = ' '                
@@ -375,7 +371,7 @@ def addView(view,x,y):
             for i in range(5):
                 # replace squares
                 allview[playery + 3][playerx - 2 + i] = view[4][i]
-                if view[4][i] == '*': #same as above
+                if view[4][i] == '*' or exploreview[playery + 3][playerx - 2 + i] == 'v': #same as above
                     exploreview[playery + 3][playerx - 2 + i] = 'v'
                 else:
                     exploreview[playery + 3][playerx - 2 + i] = ' '                
@@ -405,7 +401,7 @@ def addView(view,x,y):
             for i in range(5):
                 # replace squares
                 allview[playery - 3][playerx - 2 + i] = view[0][i]
-                if view[4][i] == '*': #same as above
+                if view[0][i] == '*' or exploreview[playery - 3][playerx - 2 + i] == 'v': #same as above
                     exploreview[playery - 3][playerx - 2 + i] = 'v'
                 else:
                     exploreview[playery - 3][playerx - 2 + i] = ' '                
