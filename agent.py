@@ -14,6 +14,7 @@ import random
 import time
 import copy
 import re
+import math
 
 # declaring visible grid to agent
 view = [['' for _ in range(5)] for _ in range(5)]
@@ -128,6 +129,7 @@ def reconstruct_path(cameFrom, current): #backtrace function
 
 # function to take get action from AI or user
 def get_action(view):
+    global orientation
     orientation = 0
     global moves
     for i in moves:
@@ -266,6 +268,28 @@ def get_action(view):
             exploreview[playery][playerx] = 'v' #set position to visited
             return move
 
+def revPath(path):
+    fpath = path[::-1]
+    curr = ()
+    newP = ""
+    for i in fpath:
+        print('xd')
+        if curr == ():
+            curr = i
+            continue
+        else:
+            if curr[0] != i[0]:
+                if curr[0] + 1 == i[0]:
+                    # move right
+                    newP = newP + "R"
+                else:
+                    newP = newP + "L"
+            if curr[1] != i[1]:
+                if curr[1] + 1 == i[0]:
+                    newP = newP + "D"
+                else:
+                    newP = newP + "U"
+    turnToPath(newP,orientation)
 
 def walkable(view,x,y):
     # find location of player
@@ -378,9 +402,8 @@ def rotate(dir, cur):
     if cur + 3 == dir:
         return 'l'
 
-def turnToPath(directions):
+def turnToPath(directions,facing = 0):
     arr = list(directions.replace("^",""))
-    facing = 0
     res = ''
     for i in arr:
         if i == 'U':
@@ -395,7 +418,7 @@ def turnToPath(directions):
         if i == 'L':
             res = res + rotate(3,facing) + 'f'
             facing = 3
-    return res    
+    return res 
 # rotates from current direction to desired direction
     
 
