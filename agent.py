@@ -58,12 +58,78 @@ def rotateMatrix(mat):
             mat[5-1-x][5-1-y] = mat[5-1-y][x]
             # assign temp to left
             mat[5-1-y][x] = temp
-    
+
+def bfs_closest(exploreview, coord):
+    Queue = [[playery, playerx]]
+    seen = [[playery, playerx]]
+    while Queue != []:
+        coord = Queue.pop(0)
+        if exploreview[coord[0]][coord[1]] == ' ':
+            return True
+        elif allview[coord[0]][coord[1]] == '*' or allview[coord[0]][coord[1]] == 'T' or allview[coord[0]][coord[1]] == '-' or \
+             allview[coord[0]][coord[1]] == '~':
+            seen.append([coord[0], coord[1]])
+        else:                
+            if [coord[0] - 1, coord[1]] not in seen:
+                seen.append([coord[0]-1, coord[1]])
+                Queue.append([coord[0]-1, coord[1]])
+            if [coord[0], coord[1]-1] not in seen:
+                seen.append([coord[0], coord[1]-1])
+                Queue.append([coord[0], coord[1]-1])
+            if [coord[0], coord[1]+1] not in seen:
+                seen.append([coord[0], coord[1]+1])
+                Queue.append([coord[0], coord[1]+1])
+            if [coord[0] + 1, coord[1]] not in seen:
+                seen.append([coord[0], coord[1]])
+                Queue.append([coord[0], coord[1]])
+    return False  
+
+def Astar(player, coord):
+    closed = []
+    neighbours = [(player[0]-1, player[1]), (player[0]+1, player[1]), (player[0], player[1]+1), (player[0], player[1]-1)]
+    open = [[player[0], player[1]]]
+    cameFrom = [[]]
+    gscore = {}
+    gscore[(player[0], player[1])] = 0
+    fscore = {}
+    fscore[(player[0], player[1])] = sqrt(abs(player[0] - coord[0])**2 + abs(player[1] - coord[1])**2)
+    while open != []:
+        current = min(fscore, key=fscore.get)
+        if current == coord:
+            return reconstruct_path(cameFrom, current)
+        open.remove(current)
+        close.append(current)
+        if allview[current[0]][current[1]] == '*' or allview[current[0]][current[1]] == 'T' or allview[current[0]][current[1]] == '-' or \
+           allview[current[0]][current[1]] == '~':
+            continue
+        for i in neighbours:
+            if i in closed:
+                continue
+            if i not in open:
+                open.append(i)
+            if current not in gscore.keys():
+                gscore[current] = 100
+            if i not in gscore.keys():
+                gscore[i] = 100  
+            tent = gscore[current] + abs(current[0] - coord[0]) + abs(current[1] - coord[1])
+            if tent >= gscore[i]:
+                continue
+            cameFrom[i] = current
+            gscore[i] = tent
+            fscore[i] = gscore[i] + sqrt(abs(player[0] - coord[0])**2 + abs(player[1] - coord[1])**2)
+    return False
+
+def reconstruct_path(cameFrom, current):
+    total_path = [current]
+    while current in cameFrom:
+        current = cameFrom[current]
+        total_path.append(current)
+    return total_path
+
 # function to take get action from AI or user
 def get_action(view):
     orientation = 0
     global moves
-
     for i in moves:
         if i == 'l':
             orientation = (orientation - 1) % 4
@@ -104,6 +170,7 @@ def get_action(view):
     global axe
     global stone
     global raft
+    
     resources = {'o':'Rock','k':'Key','a':'Axe'} 
     if key > 0:
         resources['-'] = 'Door'
@@ -118,12 +185,19 @@ def get_action(view):
                     x = j  
                     low = abs(i-1) + abs(j-2)
     #print(resources)
-    print("ANALYSIS")
-    printMap(analyse())
-    print("ANALYSIS")
+    #print("ANALYSIS")
+    #printMap(analyse())
+    #print("ANALYSIS")
+    coord = []
+    result = bfs_closest(exploreview, coord)
+    print(result)
     try:
-        path = walkable(view,x,y)
-        path1 = list(path)
+        if low < 6:
+            path = walkable(view,x,y)
+            path1 = list(path)
+        elif result == True:    
+            path = Astar([playery, playerx], coord)            
+            #TODO TURN IT INTO PATH
         if path1[0] != 'F':
             time.sleep(0.25)
             if view[1][2] == 'T' and axe == 1 and move == 'f':
@@ -401,7 +475,7 @@ def addView(view,x,y):
             # check allview and replace squares since replacing older squares dont matter for correctness
             for i in range(5):
                 # replace squares
-                allview[playery-2+i][playerx - 3] = view[i][0]
+                allview[playery - 2 + i][playerx - 3] = view[i][0]
                 if view[i][0] == '*' or exploreview[playery - 2 + i][playerx - 3] == 'v': #same as above
                     exploreview[playery - 2 + i][playerx - 3] = 'v'
                 else:
