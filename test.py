@@ -107,7 +107,7 @@ def addView(view,x,y):
             allview[y][x] = '>'
             # updates to playerx and playery
             playerx = playerx + 1
-            printDebug(x,y)
+            printDebug()
                 
         # move left
         else:
@@ -132,7 +132,7 @@ def addView(view,x,y):
                 allview[playery][playerx] = ' '
             allview[y][x+1] = '<'
             playerx = playerx - 1
-            printDebug(x,y)
+            printDebug()
 
     # vertical move
     elif y != playery:
@@ -158,7 +158,7 @@ def addView(view,x,y):
             allview[y][x] = 'v'
             # updates to playerx and playery
             playery = playery + 1
-            printDebug(x,y)
+            printDebug()
         # move up
         else:
             print('up')
@@ -183,7 +183,7 @@ def addView(view,x,y):
                 allview[playery][playerx] = ' '
             playery = playery - 1
             allview[playery][playerx] = '^'
-            printDebug(x,y)
+            printDebug()
         
     # no view to add
     else:
@@ -261,9 +261,7 @@ def printMap(view):
         print()
 
 # print all variables DEBUG
-def printDebug(x,y):
-    print('Current x is ' + str(x))
-    print('Current y is ' + str(y))
+def printDebug():
     print('Current playerx is ' + str(playerx))
     print('Current playery is ' + str(playery))
     print('Current currx is ' + str(currx))

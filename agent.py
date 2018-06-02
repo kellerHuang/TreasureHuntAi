@@ -25,6 +25,11 @@ axe = 0
 raft = 0
 key = 0
 orientation = 0
+# a current Destination which we are trying to get to
+# MUST BE REACHABLE
+currentDestination = {}
+# the current instructions to reach the current destination
+currentPath = ""
 # curr is a rotated view
 # a and b are the x and y co-ordinates of the middle tile of the view
 
@@ -61,8 +66,13 @@ def rotateMatrix(mat):
     
 # function to take get action from AI or user
 def get_action(view):
-    orientation = 0
+    # find next destination
+    global currentDestination
+    global currentPath
     global moves
+    global playerx
+    global playery      
+    orientation = 0
 
     for i in moves:
         if i == 'l':
@@ -84,9 +94,10 @@ def get_action(view):
         rotate[2][2] = '<'
     #print_grid(rotate)
     #print('------')
-    global playerx
-    global playery
-    if moves != [] and moves[-1] == 'f':
+    # ========== new Code
+    if allview == [[]]:
+        addView(view,playerx,playery)
+    elif moves != [] and moves[-1] == 'f':
         if orientation == 0:
             addView(rotate,playerx,playery-1)
         elif orientation == 1:
@@ -97,9 +108,60 @@ def get_action(view):
             addView(rotate,playerx-1,playery)
     else:
         addView(rotate,playerx,playery)
+    if allview != [[]]:
+        if currentPath == "":
+            currentDestination.pop('x',None)
+            currentDestination.pop('y',None)
+            print("removed")
+        if 'x' not in currentDestination and 'y' not in currentDestination:
+            wView = walkableView()
+            entropy = analyse()
+            printMap(wView)
+            print("=============")
+            printMap(allview)
+            print("==================")
+            printMap(entropy)
+            # search for goal entropies
+            for i in range(sizex):
+                for j in range(sizey):
+                    if wView[j][i] != 'F' and entropy[j][i] > 24:
+                        currentDestination['x'] = i
+                        currentDestination['y'] = j
+                        break
+            # search for other entropies
+            if 'x' not in currentDestination and 'y' not in currentDestination:
+                for i in range(sizex):
+                    for j in range(sizey):
+                        if wView[j][i] != 'F' and entropy[j][i] > 0:
+                            currentDestination['x'] = i
+                            currentDestination['y'] = j
+                            break
+            if 'x' not in currentDestination and 'y' not in currentDestination:
+                print("No more gains")
+                print(currentDestination)
+            else:
+                # find path to destination
+                # TODO replace when Astar is implemented
+                currentPath = wView[currentDestination['y']][currentDestination['x']]
+        if 'x' in currentDestination and 'y' in currentDestination:
+            # walk towards destination
+            print("CURRENTPATH")
+            print(currentPath)
+            print("CURRENTDESTINATION")
+            print(currentDestination)
+            move = currentPath[0]
+            currentPath = currentPath[1:]
+            moves.append(move)
+            print("SCRIPTED")
+            if move == 'f' and view[2][2] == '-':
+                move = 'u'
+            return move
+    print("past")
+    # ======= end new code
     printMap(allview)
     print("------------------")
-    printMap(exploreview)
+    
+    #printMap(exploreview)
     global key
     global axe
     global stone
@@ -117,15 +179,12 @@ def get_action(view):
                     y = i
                     x = j  
                     low = abs(i-1) + abs(j-2)
-    #print(resources)
-    print("ANALYSIS")
-    printMap(analyse())
-    print("ANALYSIS")
+
     try:
         path = walkable(view,x,y)
         path1 = list(path)
         if path1[0] != 'F':
-            time.sleep(0.25)
+            #time.sleep(0.25)
             if view[1][2] == 'T' and axe == 1 and move == 'f':
                 raft = raft + 1
                 moves.append('c')
@@ -147,7 +206,6 @@ def get_action(view):
         raise NameError
     except NameError:
         while 1:
-            print('random')
             inp = random.randrange(6)
             if inp < 4:
                 move = 'f'
@@ -187,7 +245,7 @@ def get_action(view):
                     stone = stone - 1
                 else:
                     raft = raft - 1
-            time.sleep(0.25)
+            #time.sleep(0.25)
             moves.append(move)
             exploreview[playery][playerx] = 'v' #set position to visited
             return move
@@ -231,7 +289,6 @@ def walkable(view,x,y):
     else:
         return 'False'
 
-# Similar to walkable but specifically for allview/exploreview
 def walkableView():
     # find location of player
     test = copy.deepcopy(allview)
@@ -241,13 +298,14 @@ def walkableView():
         free['-'] = 'Door'
     if axe == 1:
         free['T'] = 'Tree'
+    test[playery][playerx] = '^'
     while change == 1:
         change = 0
         for i in range(sizey):
             for j in range(sizex):
                 check = re.sub('[RLUD]','',test[i][j])
                 if check == '^':
-                    if i < 4:
+                    if i < sizey-1:
                         if test[i+1][j] in free:
                             test[i+1][j] = test[i][j] + 'D'
                             change = 1
@@ -255,7 +313,7 @@ def walkableView():
                         if test[i-1][j] in free:
                             test[i-1][j] = test[i][j] + 'U'
                             change = 1
-                    if j < 4:
+                    if j < sizex-1:
                         if test[i][j+1] in free:
                             test[i][j+1] = test[i][j] + 'R'
                             change = 1
@@ -263,24 +321,9 @@ def walkableView():
                         if test[i][j-1] in free:
                             test[i][j-1] = test[i][j] + 'L'
                             change = 1
-    # run once again but for '?'
-    free['?'] = 'unknown'
-    for i in range(sizey):
-        for j in range(sizex):
-            check = re.sub('[RLUD]','',test[i][j])
-            if check == '^':
-                if i < 4:
-                    if test[i+1][j] in free:
-                        test[i+1][j] = test[i][j] + 'D'
-                if i > 0:
-                    if test[i-1][j] in free:
-                        test[i-1][j] = test[i][j] + 'U'
-                if j < 4:
-                    if test[i][j+1] in free:
-                        test[i][j+1] = test[i][j] + 'R'
-                if j > 0:
-                    if test[i][j-1] in free:
-                        test[i][j-1] = test[i][j] + 'L'
+    print("TEST")
+    printMap(test)
+    print("===")
     for i in range(sizey):
         for j in range(sizex):
             if test[i][j].startswith('^'):
@@ -327,6 +370,7 @@ def turnToPath(directions):
 
 # helper function to print the grid
 def print_grid(view):
+    print('#############################')
     print('+-----+')
     for ln in view:
         print("|"+str(ln[0])+str(ln[1])+str(ln[2])+str(ln[3])+str(ln[4])+"|")
@@ -352,6 +396,7 @@ def addView(view,x,y):
                     exploreview[i][j] = 'v' #mark it as visited
                 else:
                     exploreview[i][j] == ' ' #all other cells are unvisited
+        #printMap(allview)
         return
     findPlayer(allview)
     # horizontal move
@@ -381,9 +426,9 @@ def addView(view,x,y):
             else:                 
             # change so that rocks can be found
                 allview[playery][playerx] = ' '
-            allview[y][x] = '>'
             # updates to playerx and playery
             playerx = playerx + 1
+            allview[playery][playerx] = '>'
                 
         # move left
         else:
@@ -413,8 +458,8 @@ def addView(view,x,y):
             else:
             # moved playerx to account for new column
                 allview[playery][playerx] = ' '
-            allview[y][x+1] = '<'
             playerx = playerx - 1
+            allview[playery][playerx] = '<'
 
     # vertical move
     elif y != playery:
@@ -475,7 +520,7 @@ def addView(view,x,y):
                 allview[playery][playerx] = ' '
             playery = playery - 1
             allview[playery][playerx] = '^'
-        
+
     # no view to add
     else:
     #check what orientation you are in
@@ -497,13 +542,16 @@ def addView(view,x,y):
                 allview[playery][playerx-1] == ' '
             elif view[2][1] == ' ' and allview[playery][playerx-1] == 'T':
                 allview[playery][playerx-1] == ' '
-        elif playerOri == '^':
+        elif playerOri == '>':
             if view[2][3] == ' ' and allview[playery][playerx+1] == '-':
                 allview[playery][playerx+1] == ' '
             elif view[2][3] == ' ' and allview[playery][playerx+1] == 'T':
                 allview[playery][playerx+1] == ' '
         else:
             pass
+        print("CHANGE")
+        allview[playery][playerx] = playerOri
+    #printMap(allview)
 
 # a helper function to find the location of the player
 def findPlayer(map):
@@ -513,13 +561,17 @@ def findPlayer(map):
     global curry
     global playerOri
     player = {'<':'left','v':'down','>':'right','^':'up'}
-
+    left = {'^':'<','<':'v','v':'>','>':'^'}
+    right = {'^':'>','>':'v','v':'<','<':'^'}
+    if moves[-1] == 'l':
+        playerOri = left[playerOri]
+    if moves[-1] == 'r':
+        playerOri = right[playerOri]
     for i in range(sizex):
         for j in range(sizey):
             if map[j][i] in player:
                 playerx = i
                 playery = j
-                playerOri = map[j][i]
                 return
 
 # given a matrix and its current size, adds a '?' initiated column on x = 0
@@ -554,9 +606,19 @@ def printMap(view):
 # a function to check entropy values of walkable areas
 def analyse():
     test = copy.deepcopy(allview)
+    free = {'o': 'stone'}
+    if axe == 0:
+        free['a'] = 'axe'
+    if key == 0:
+        free['k'] = 'key'
+    if key != 0:
+        free['-'] = 'door'
+    print(free)
     for i in range(sizey):
         for j in range(sizex):
             entropy = 0
+            if allview[i][j] in free:
+                entropy = entropy + 24
             # get bounds on where to search
             if i < 2:
                 # need to search from 0 to i + 2
@@ -603,10 +665,15 @@ def analyse():
             test[i][j] = entropy
     return test
 
-            
-            
+#def getLoc(entropy,walkable):
 
-            
+def printDebug():
+    print('Current playerx is ' + str(playerx))
+    print('Current playery is ' + str(playery))
+    print('Current currx is ' + str(currx))
+    print('Current curry is ' + str(curry))       
+
+
 if __name__ == "__main__":
 
     # checks for correct amount of arguments 
@@ -652,6 +719,16 @@ if __name__ == "__main__":
         if j==0 and i==0:
             print_grid(view) # COMMENT THIS OUT ON SUBMISSION
             action = get_action(view) # gets new actions
+            ob = {'a':'axe', 'k':'key','o':'stone'}
+            if action == 'f' and view[1][2] in ob:
+                item = view[1][2]
+                print("ITEMMMMMMM")
+                if item == 'a':
+                    axe = 1
+                if item == 'k':
+                    key = 1
+                if item == 'o':
+                    stone = stone + 1
             sock.send(action.encode('utf-8'))
 
     sock.close()

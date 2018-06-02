@@ -1,0 +1,51 @@
+# Similar to walkable but specifically for allview/exploreview
+def walkableView():
+    # find location of player
+    test = copy.deepcopy(allview)
+    test[playery][playerx] = '^'
+    change = 1
+    free = {'o':'Stone','k':'Key','a':'Axe',' ':'Space', 'O':'placed_Stone'}
+    if key == 1:
+        free['-'] = 'Door'
+    if axe == 1:
+        free['T'] = 'Tree'
+    while change == 1:
+        change = 0
+        for i in range(sizey):
+            for j in range(sizex):
+                if test[i][j] == '^':
+                    if i < 4:
+                        if test[i+1][j] in free:
+                            test[i+1][j] = '^'
+                            change = 1
+                    if i > 0:
+                        if test[i-1][j] in free:
+                            test[i-1][j] = '^'
+                            change = 1
+                    if j < 4:
+                        if test[i][j+1] in free:
+                            test[i][j+1] = '^'
+                            change = 1
+                    if j > 0:
+                        if test[i][j-1] in free:
+                            test[i][j-1] = '^'
+                            change = 1
+    # run once again but for '?'
+    free['?'] = 'unknown'
+    for i in range(sizey):
+        for j in range(sizex):
+            if test[i][j] == '^':
+                if i < 4:
+                    if test[i+1][j] in free:
+                        test[i+1][j] = '^'
+                if i > 0:
+                    if test[i-1][j] in free:
+                        test[i-1][j] = '^'
+                if j < 4:
+                    if test[i][j+1] in free:
+                        test[i][j+1] = '^'
+                if j > 0:
+                    if test[i][j-1] in free:
+                        test[i][j-1] = '^'
+
+    return test
