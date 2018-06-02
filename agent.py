@@ -60,15 +60,15 @@ def rotateMatrix(mat):
             # assign temp to left
             mat[5-1-y][x] = temp
 
-def bfs_closest(exploreview, coord):
+def bfs_closest(coord):
     Queue = [[playery, playerx]] #cells to be expanded
     seen = [] #cells already expanded
     while Queue != []:
         coord = Queue.pop(0) #take the first node in the queue
         if exploreview[coord[0]][coord[1]] == ' ':
-            return True #if it is empty, we have found out closest empty node
+            return coord #if it is empty, we have found out closest empty node
         elif allview[coord[0]][coord[1]] == '*' or allview[coord[0]][coord[1]] == 'T' or allview[coord[0]][coord[1]] == '-' or \
-             allview[coord[0]][coord[1]] == '~':
+            allview[coord[0]][coord[1]] == '~':
             seen.append([coord[0], coord[1]]) #if it is not visitable unless using resources, ignore
         else: #for each neighbour, add to queue, with those facing front added first as they are closer               
             if [coord[0] - 1, coord[1]] not in seen:
@@ -83,20 +83,21 @@ def bfs_closest(exploreview, coord):
             if [coord[0] + 1, coord[1]] not in seen:
                 seen.append([coord[0], coord[1]])
                 Queue.append([coord[0], coord[1]])
-    return False  #if none found, return false
+    return ['false']  #if none found, return false
 
 def Astar(player, coord): #generic astar function, same as psuedo code on wikipedia
     closed = [] #set of nodes already seen
     neighbours = [(player[0]-1, player[1]), (player[0]+1, player[1]), (player[0], player[1]+1), (player[0], player[1]-1)] #all possible adjacent cells
-    open = [[player[0], player[1]]] #set of nodes yet to be expanded
+    open = [(player[0], player[1])] #set of nodes yet to be expanded
     cameFrom = {} #dict of where each node came from 
     gscore = {} #cost of getting from start to that node
     gscore[(player[0], player[1])] = 0
     fscore = {} #cost of getting from start node to that node. Requires heuristic
-    fscore[(player[0], player[1])] = sqrt(abs(player[0] - coord[0])**2 + abs(player[1] - coord[1])**2) #birds eye distance as heuristic
+    fscore[(player[0], player[1])] = math.sqrt(abs(player[0] - coord[0])**2 + abs(player[1] - coord[1])**2) #birds eye distance as heuristic
     while open != []:
         current = min(fscore, key=fscore.get) #get smallest fscore
         if current == coord: #if goal we are at where we need to be
+            print("AAAAAAAA")
             return reconstruct_path(cameFrom, current)
         open.remove(current) 
         close.append(current)
@@ -191,14 +192,17 @@ def get_action(view):
     #printMap(analyse())
     #print("ANALYSIS")
     coord = [] #the coordinates of the nearest unvisited cell
-    result = bfs_closest(exploreview, coord) #stores the nearest unvisited cell coordinates, returns false if no such cell
+    result = bfs_closest(coord) #stores the nearest unvisited cell coordinates, returns false if no such cell
     print(result)
     try:
         if low < 6: #if there is an immediately reachable resource
             path = walkable(view,x,y)
             path1 = list(path)
-        elif result == True: #if there is an unvisited cell   
-            path = Astar([playery, playerx], coord) #astar returns the path from current player position to coord           
+        elif result[0] != 'false': #if there is an unvisited cell
+            res_coord = (result[0], result[1])
+            path = Astar([playery, playerx], res_coord) #astar returns the path from current player position to coord           
+            path1 = list(revPath(path))
+            print(path1)
             #TODO TURN IT INTO PATH1. RN ASTAR RETURNS THE PATH IN REVERSE. TURN INTO ACTIONS TO PASS INTO THE LINE BELOW vvv
         if path1[0] != 'F':
             time.sleep(0.25)
