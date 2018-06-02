@@ -2,12 +2,13 @@
 
 import copy
 
+orientation = "v"
+
 def revPath(path):
     fpath = path[::-1]
     curr = ()
     newP = ""
     for i in fpath:
-        print('xd')
         if curr == ():
             curr = i
             continue
@@ -23,7 +24,16 @@ def revPath(path):
                     newP = newP + "D"
                 else:
                     newP = newP + "U"
-    turnToPath(newP,orientation)
+    if orientation == '^':
+        f = 0
+    elif orientation == '>':
+        f = 1
+    elif orientation == 'v':
+        f = 2
+    else:
+        f = 3
+    
+    return turnToPath(newP,f)
 
 def turnToPath(directions,facing = 0):
     arr = list(directions.replace("^",""))
@@ -58,5 +68,5 @@ def rotate(dir, cur):
         return 'l'
 
 path = [(1,1),(2,1)]
-revPath(path)
+print(revPath(path))
 # takes in a tuple turns into actual path

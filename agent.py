@@ -273,7 +273,6 @@ def revPath(path):
     curr = ()
     newP = ""
     for i in fpath:
-        print('xd')
         if curr == ():
             curr = i
             continue
@@ -289,7 +288,16 @@ def revPath(path):
                     newP = newP + "D"
                 else:
                     newP = newP + "U"
-    turnToPath(newP,orientation)
+    if orientation == '^':
+        f = 0
+    elif orientation == '>':
+        f = 1
+    elif orientation == 'v':
+        f = 2
+    else:
+        f = 3
+    
+    return turnToPath(newP,f)
 
 def walkable(view,x,y):
     # find location of player
