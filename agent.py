@@ -199,6 +199,7 @@ def get_action(view):
             path1 = list(path)
         elif result == True: #if there is an unvisited cell   
             path = Astar([playery, playerx], coord) #astar returns the path from current player position to coord           
+            path1 = revpath(path)
             #TODO TURN IT INTO PATH1. RN ASTAR RETURNS THE PATH IN REVERSE. TURN INTO ACTIONS TO PASS INTO THE LINE BELOW vvv
         if path1[0] != 'F':
             time.sleep(0.25)
@@ -289,7 +290,7 @@ def revPath(path):
                     newP = newP + "D"
                 else:
                     newP = newP + "U"
-    turnToPath(newP,orientation)
+    return turnToPath(newP,orientation)
 
 def walkable(view,x,y):
     # find location of player
