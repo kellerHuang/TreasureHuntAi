@@ -193,6 +193,7 @@ def get_action(view):
     else:
         addView(rotate,playerx,playery)
     exploreview[playery][playerx] = 'v' #set position to visited
+    print("ALLVIEW")
     printMap(allview)
     print(orientation)
     print("------------------")
@@ -246,7 +247,6 @@ def get_action(view):
                 key = 1
             if view[1][2] == '-' and key == 1 and move == 'f':
                 moves.append('u')
-                explore[playery][playerx] = 'v'
                 return 'u'
             if view[1][2] == 'o' and move == 'f':
                 stone = stone + 1
