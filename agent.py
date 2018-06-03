@@ -104,10 +104,11 @@ def Astar(player, coord): #generic astar function, same as psuedo code on wikipe
     fscore = {} #cost of getting from    start node to that node. Requires heuristic
     fscore[(player[0], player[1])] = math.sqrt(abs(player[0] - coord[0])**2 + abs(player[1] - coord[1])**2) #birds eye distance as heuristic
     while open != []:
-        current = open[0] 
+        current = open[0]
         for i in open:
             if fscore[i] < fscore[current]:
                 current = i
+
         if current == coord: #if goal we are at where we need to be
             return reconstruct_path(cameFrom, current)
         # print("===========")
@@ -293,12 +294,19 @@ def get_action(view):
             entropy = analyse()
             for i in range(sizey):
                 for j in range(sizex):
-                    if allview[i][j] == 'T' and Astar((playery,playerx),(i,j)) != False:
+                    if allview[i][j] == 'T' and Astar([playery,playerx],[i,j]) != False:
                         trees[(i,j)] = entropy[i][j]
             
             # sort by entropy
+            high = 0
+            node = ()
+            for i in trees:
+                if trees[i] > high:
+                    node = i
+                    high = trees[i]
 
-
+            #if node != ():
+            #else:
         raise NameError
     except NameError:
         while 1:
