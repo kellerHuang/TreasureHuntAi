@@ -92,7 +92,7 @@ def Astar(player, coord): #generic astar function, same as psuedo code on wikipe
     cameFrom = {} #dict of where each node came from 
     gscore = {} #cost of getting from start to that node
     gscore[(player[0], player[1])] = 0
-    fscore = {} #cost of getting from start node to that node. Requires heuristic
+    fscore = {} #cost of getting from    start node to that node. Requires heuristic
     fscore[(player[0], player[1])] = math.sqrt(abs(player[0] - coord[0])**2 + abs(player[1] - coord[1])**2) #birds eye distance as heuristic
     while open != []:
         current = open[0] 
@@ -101,16 +101,22 @@ def Astar(player, coord): #generic astar function, same as psuedo code on wikipe
                 current = i
         if current == coord: #if goal we are at where we need to be
             return reconstruct_path(cameFrom, current)
-        print("AAAAAAAA")
+        print("===========")
         print(current)
-        print("AAAAAAAA")
-        print(open)
-        print("AAAAAAAA")
         open.remove(current) 
         closed.append(current)
         if allview[current[0]][current[1]] == '*' or allview[current[0]][current[1]] == 'T' or allview[current[0]][current[1]] == '-' or \
            allview[current[0]][current[1]] == '~':
             continue #if requires resources or unvisitable, skip
+        neighbours = []
+        if current[0] > 0:
+            neighbours.append((current[0]-1,current[1]))
+        if current[0] < curry:
+            neighbours.append((current[0]+1,current[1]))
+        if current[1] > 0:
+            neighbours.append((current[0],current[1]-1))
+        if current[1] < currx:
+            neighbours.append((current[0],current[1]+1))
         for i in neighbours: #for all the adjacent cells
             if i in closed: #if seen already,skip
                 continue
@@ -125,7 +131,8 @@ def Astar(player, coord): #generic astar function, same as psuedo code on wikipe
                 continue #if not, ignore
             cameFrom[i] = current #otherwise, update where this node came from
             gscore[i] = tent
-            fscore[i] = gscore[i] + math.sqrt(abs(player[0] - coord[0])**2 + abs(player[1] - coord[1])**2)
+            fscore[i] = gscore[i] + math.sqrt(abs(current[0] - coord[0])**2 + abs(current[1] - coord[1])**2)
+
     return False #if not found, return false
 
 def reconstruct_path(cameFrom, current): #backtrace function
@@ -227,7 +234,7 @@ def get_action(view):
             print(path1)
             #TODO TURN IT INTO PATH1. RN ASTAR RETURNS THE PATH IN REVERSE. TURN INTO ACTIONS TO PASS INTO THE LINE BELOW vvv
         if path1[0] != 'F':
-            time.sleep(0.25)
+            #time.sleep(0.25)
             if view[1][2] == 'T' and axe == 1 and move == 'f':
                 raft = raft + 1
                 moves.append('c')
@@ -287,7 +294,7 @@ def get_action(view):
                     stone = stone - 1
                 else:
                     raft = raft - 1
-            time.sleep(0.25)
+            #time.sleep(0.25)
             moves.append(move)
             return move
 
@@ -306,15 +313,15 @@ def revPath(path):
         else:
             if curr[0] != i[0]:
                 if curr[0] + 1 == i[0]:
-                    # move right
                     newP = newP + "D"
                 else:
                     newP = newP + "U"
             if curr[1] != i[1]:
-                if curr[1] + 1 == i[0]:
+                if curr[1] + 1 == i[1]:
                     newP = newP + "R"
                 else:
                     newP = newP + "L"
+        curr = i
     print(newP)
     return turnToPath(newP,orientation)
 
@@ -470,12 +477,6 @@ def addView(view,x,y):
     global exploreview
     global sizex
     global sizey
-    print("PlayerX")
-    print(playerx)
-    print("Playery")
-    print(playery)
-    print(x)
-    print(y)
     if allview == [[]]:
         allview = copy.deepcopy(view)
         exploreview = copy.deepcopy(view) #copy the initial 5x5 view 
@@ -507,7 +508,7 @@ def addView(view,x,y):
                 if view[i][4] == '*' or exploreview[playery - 2 + i][playerx + 3] == 'v': #if the new cell being added is a wall
                     exploreview[playery - 2 + i][playerx + 3] = 'v' #mark it as visited
                 else:
-                    exploreview[playery - 2 + 1][playerx + 3] = ' ' #otherwise mark it as unvisited               
+                    exploreview[playery - 2 + i][playerx + 3] = ' ' #otherwise mark it as unvisited               
             # change player location
             if view[2][1] == 'O':
                 allview[playery][playerx] = 'O'
@@ -530,10 +531,6 @@ def addView(view,x,y):
                 currx = currx + 1
                 sizex = sizex + 1
             # check allview and replace squares since replacing older squares dont matter for correctness
-            print("TESTx")
-            print(playerx)
-            print(playery)
-            printMap(view)
             for i in range(5):
                 # replace squares
                 allview[playery - 2 + i][playerx - 3] = view[i][0]
@@ -541,7 +538,6 @@ def addView(view,x,y):
                     exploreview[playery - 2 + i][playerx - 3] = 'v'
                 else:
                     exploreview[playery - 2 + i][playerx - 3] = ' '                                  
-                printMap(exploreview)
             # change player location
             if view[2][3] == 'O':
                 allview[playery][playerx] = 'O'                 
@@ -551,9 +547,6 @@ def addView(view,x,y):
                 allview[playery][playerx] = ' '
             allview[y][x+1] = '<'
             playerx = playerx - 1
-            print("OVERALL")
-            printMap(exploreview)
-            print()
 
     # vertical move
     elif y != playery:
