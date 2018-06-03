@@ -175,8 +175,9 @@ def get_action(view):
         addView(rotate,playerx,playery)
     exploreview[playery][playerx] = 'v' #set position to visited
     printMap(allview)
+    print(orientation)
     print("------------------")
-    printMap(exploreview)
+   #printMap(exploreview)
     global key
     global axe
     global stone
@@ -280,6 +281,10 @@ def get_action(view):
 
 def revPath(path):
     fpath = path[::-1]
+
+    print("FPATH")
+    print(fpath)
+    print(orientation)
     curr = ()
     newP = ""
     for i in fpath:
@@ -290,24 +295,16 @@ def revPath(path):
             if curr[0] != i[0]:
                 if curr[0] + 1 == i[0]:
                     # move right
-                    newP = newP + "R"
-                else:
-                    newP = newP + "L"
-            if curr[1] != i[1]:
-                if curr[1] + 1 == i[0]:
                     newP = newP + "D"
                 else:
                     newP = newP + "U"
-    if orientation == '^':
-        f = 0
-    elif orientation == '>':
-        f = 1
-    elif orientation == 'v':
-        f = 2
-    else:
-        f = 3
-    
-    return turnToPath(newP,f)
+            if curr[1] != i[1]:
+                if curr[1] + 1 == i[0]:
+                    newP = newP + "R"
+                else:
+                    newP = newP + "L"
+    print(newP)
+    return turnToPath(newP,orientation)
 
 def walkable(view,x,y):
     # find location of player
@@ -628,6 +625,8 @@ def addView(view,x,y):
                 allview[playery][playerx+1] == ' '
         else:
             pass
+        parse = {0:'^',1:'>',2:'v',3:'<'}
+        allview[playery][playerx] = parse[orientation]
 
 # a helper function to find the location of the player
 def findPlayer(map):
