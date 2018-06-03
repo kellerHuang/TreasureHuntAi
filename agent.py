@@ -95,10 +95,17 @@ def Astar(player, coord): #generic astar function, same as psuedo code on wikipe
     fscore = {} #cost of getting from start node to that node. Requires heuristic
     fscore[(player[0], player[1])] = math.sqrt(abs(player[0] - coord[0])**2 + abs(player[1] - coord[1])**2) #birds eye distance as heuristic
     while open != []:
-        current = min(fscore, key=fscore.get) #get smallest fscore
+        current = open[0] 
+        for i in open:
+            if fscore[i] < fscore[current]:
+                current = i
         if current == coord: #if goal we are at where we need to be
-            print("AAAAAAAA")
             return reconstruct_path(cameFrom, current)
+        print("AAAAAAAA")
+        print(current)
+        print("AAAAAAAA")
+        print(open)
+        print("AAAAAAAA")
         open.remove(current) 
         closed.append(current)
         if allview[current[0]][current[1]] == '*' or allview[current[0]][current[1]] == 'T' or allview[current[0]][current[1]] == '-' or \
@@ -201,6 +208,7 @@ def get_action(view):
         elif result[0] != 'false': #if there is an unvisited cell
             res_coord = (result[0], result[1])
             path = Astar([playery, playerx], res_coord) #astar returns the path from current player position to coord           
+            print(path)
             path1 = list(revPath(path))
             print(path1)
             #TODO TURN IT INTO PATH1. RN ASTAR RETURNS THE PATH IN REVERSE. TURN INTO ACTIONS TO PASS INTO THE LINE BELOW vvv
