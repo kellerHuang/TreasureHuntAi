@@ -65,20 +65,23 @@ def rotateMatrix(mat):
             # assign temp to left
             mat[5-1-y][x] = temp
 
-def bfs_closest(coord,water = 0):
-    Queue = [[coord[0], coord[1]]] #cells to be expanded
+def bfs_closest(start,water = 0):
+    Queue = [[start[0], start[1]]] #cells to be expanded
     seen = [] #cells already expanded
     obstacles = {'*':'Wall','T':'Tree','-':'Door','~':'Water','.':'OOB'}
     goal = ' '
     if key != 0:
         obstacles.pop('-', None)
     if water == 1:
-        obstacles.pop('W', None)
+        obstacles.pop('~', None)
         obstacles[' '] = 'Land'
         goal = '~'
+        print("WATER")
     while Queue != []:
         coord = Queue.pop(0) #take the first node in the queue
-        if exploreview[coord[0]][coord[1]] == goal:
+        if exploreview[coord[0]][coord[1]] == ' ' and allview[coord[0]][coord[1]] == goal:
+            print("BFS RETURN",end='')
+            print(coord)
             return coord #if it is empty, we have found out closest empty node
         elif allview[coord[0]][coord[1]] in obstacles:
             seen.append([coord[0], coord[1]]) #if it is not visitable unless using resources, ignore
@@ -114,6 +117,7 @@ def Astar(player, coord, tree = 0, door = 0, water = 0): #generic astar function
     if water == 1:
         obstacles.pop('~')
         obstacles[' '] = 'land'
+        obstacles['O'] = 'stone'
     while open != []:
         current = open[0]
         for i in open:
@@ -131,12 +135,20 @@ def Astar(player, coord, tree = 0, door = 0, water = 0): #generic astar function
         neighbours = []
         if current[0] > 0:
             neighbours.append((current[0]-1,current[1]))
+            print(current[0]-1,end=" ")
+            print(current[1])
         if current[0] < curry:
             neighbours.append((current[0]+1,current[1]))
+            print(current[0]+1,end=" ")
+            print(current[1])
         if current[1] > 0:
             neighbours.append((current[0],current[1]-1))
+            print(current[0],end=" ")
+            print(current[1]-1)
         if current[1] < currx:
             neighbours.append((current[0],current[1]+1))
+            print(current[0],end=" ")
+            print(current[1]+1)
         for i in neighbours: #for all the adjacent cells
             if i in closed: #if seen already,skip
                 continue
@@ -156,8 +168,6 @@ def Astar(player, coord, tree = 0, door = 0, water = 0): #generic astar function
     return False #if not found, return false
 
 def reconstruct_path(cameFrom, current): #backtrace function
-    print(cameFrom)
-    print(current)
     total_path = [current] 
     while current in cameFrom:
         current = cameFrom[current]
@@ -224,6 +234,8 @@ def get_action(view):
 
     item = {'a':'axe','o':'rock','k':'key'}
     if currentDest != () and currentPath != []:
+        print("my current destination is")
+        print(currentDest)
         curMove = currentPath.pop(0)
         if curMove == 'f' and view[1][2] == '-':
             curMove = 'u'
@@ -247,8 +259,18 @@ def get_action(view):
     if inRaft == 1:
         print("IM IN A RAFT")
         goal = bfs_closest((playery,playerx),1)
-        print("WATER GOAL")
-        print(goal)
+        if goal != ['false']:
+            print("WATER GOAL")
+            print(goal)
+            goalTuple = (goal[0],goal[1])
+            path = Astar((playery,playerx),goalTuple,0,0,1)
+            print(path)
+            path1 = list(revPath(path))
+            currentDest = goal
+            currentPath = path1[1:]
+            move = path1[0]
+            moves.append(move)
+            return move
 
     resources = {'o':'Rock','k':'Key','a':'Axe'} 
     if key > 0:
@@ -298,6 +320,7 @@ def get_action(view):
                 stone = stone + 1
             moves.append(path1[0])
             currentPath = path1[1:]
+            print("added path")
             print(path1)
             return path1[0]
         else:
