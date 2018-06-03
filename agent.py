@@ -229,7 +229,7 @@ def get_action(view):
                 return 'u'
             if view[1][2] == 'o' and move == 'f':
                 stone = stone + 1
-            moves.append(path[0])
+            moves.append(path1[0])
             return path1[0]
         raise NameError
     except NameError:
@@ -442,6 +442,9 @@ def turnToPath(directions,facing = 0):
 
 # helper function to print the grid
 def print_grid(view):
+    print("==========MOVE ",end="")
+    print(len(moves),end="")
+    print("==========")
     print('+-----+')
     for ln in view:
         print("|"+str(ln[0])+str(ln[1])+str(ln[2])+str(ln[3])+str(ln[4])+"|")
@@ -458,6 +461,12 @@ def addView(view,x,y):
     global exploreview
     global sizex
     global sizey
+    print("PlayerX")
+    print(playerx)
+    print("Playery")
+    print(playery)
+    print(x)
+    print(y)
     if allview == [[]]:
         allview = copy.deepcopy(view)
         exploreview = copy.deepcopy(view) #copy the initial 5x5 view 
