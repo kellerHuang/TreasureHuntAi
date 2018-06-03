@@ -65,7 +65,6 @@ def bfs_closest(coord):
     seen = [] #cells already expanded
     while Queue != []:
         coord = Queue.pop(0) #take the first node in the queue
-        print(coord)
         if exploreview[coord[0]][coord[1]] == ' ':
             return coord #if it is empty, we have found out closest empty node
         elif allview[coord[0]][coord[1]] == '*' or allview[coord[0]][coord[1]] == 'T' or allview[coord[0]][coord[1]] == '-' or \
@@ -197,7 +196,7 @@ def get_action(view):
     printMap(allview)
     print(orientation)
     print("------------------")
-    printMap(exploreview)
+    #printMap(exploreview)
     global key
     global axe
     global stone
@@ -251,6 +250,7 @@ def get_action(view):
             if view[1][2] == 'o' and move == 'f':
                 stone = stone + 1
             moves.append(path1[0])
+            print(path1)
             return path1[0]
         raise NameError
     except NameError:
@@ -336,6 +336,7 @@ def walkable(view,x,y):
     if axe == 1:
         free['T'] = 'Tree'
     test[2][2] = '^'
+    print(orientation)
     while change == 1:
         change = 0
         for i in range(5):
@@ -358,11 +359,38 @@ def walkable(view,x,y):
                         if test[i][j-1] in free:
                             test[i][j-1] = test[i][j] + 'L'
                             change = 1
+
     check = re.sub('[RLUD]','',test[y][x])
     if check == '^':
-        return turnToPath(test[y][x])
+        return turnToPath(rotPath(test[y][x]))
     else:
         return 'False'
+
+# rotates a path given an orientation
+def rotPath(path):
+    if orientation == 0:
+        pass
+    elif orientation == 1:
+        path = path.replace('D','4')
+        path = path.replace('U','6')
+        path = path.replace('L','8')
+        path = path.replace('R','2')
+    elif orientation == 2:
+        path = path.replace('D','8')
+        path = path.replace('U','2')
+        path = path.replace('L','6')
+        path = path.replace('R','4')
+    else:
+        path = path.replace('D','6')
+        path = path.replace('U','4')
+        path = path.replace('L','2')
+        path = path.replace('R','8')
+    path = path.replace('2','D')
+    path = path.replace('4','L')
+    path = path.replace('6','R')
+    path = path.replace('8','U')
+    return path
+
 
 # Similar to walkable but specifically for allview/exploreview
 def walkableView():
