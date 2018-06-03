@@ -8,6 +8,27 @@
 # created by Leo Hoare
 # with slight modifications by Alan Blair
 
+#Briefly describe how your program works, including any algorithms and data structures employed, and explain any design decisions you made along the way.
+
+# When get action is called:
+#Update map
+#If we are currently following a path, continue to that destination.
+#If you can see any items, can you reach them by walking?
+#Are there any spots on land you haven't visited?
+#Do you have a key, and are there any locked doors?
+#Do i not have a raft, and are there any trees? Which tree gives highest entropy?
+#Is there any water? Which entrance tile of water gives the highest entropy?
+#Are we in a raft? Explore all water possible.
+#Is there any trees i should cut despite already having a raft?
+#Do we have enough resources to get treasure and return to origin?
+
+
+#Our group utilized generic BFS and A* search with a birds eye distance heuristic
+#We also utilized a variety of 2D matrices, dictionaries, tuples and lists
+#Our ai aims to recreate human players by exploring all possible unknown cells to maximise their knowledge without recklessly spending resources.
+#Only when it is forced to will it begin to take decisions that have a risk of causing a losing outcome, but only that of which has the lowest probability which we measure through our entropy calculation.
+#Our Ai understands that water and land based traversal is unique and only explores in water once it is forced to do so and does so that it maximizes the possible future land connections
+#Then when our ai has seen the treasure, it makes sure that it has the required resources to return to the origin
 import sys
 import socket
 import random
@@ -76,12 +97,12 @@ def bfs_closest(start,water = 0):
         obstacles.pop('~', None)
         obstacles[' '] = 'Land'
         goal = '~'
-        print("WATER")
+        #print("WATER")
     while Queue != []:
         coord = Queue.pop(0) #take the first node in the queue
         if exploreview[coord[0]][coord[1]] == ' ' and allview[coord[0]][coord[1]] == goal:
-            print("BFS RETURN",end='')
-            print(coord)
+           # print("BFS RETURN",end='')
+           # print(coord)
             return coord #if it is empty, we have found out closest empty node
         elif allview[coord[0]][coord[1]] in obstacles:
             seen.append([coord[0], coord[1]]) #if it is not visitable unless using resources, ignore
@@ -135,20 +156,20 @@ def Astar(player, coord, tree = 0, door = 0, water = 0): #generic astar function
         neighbours = []
         if current[0] > 0:
             neighbours.append((current[0]-1,current[1]))
-            print(current[0]-1,end=" ")
-            print(current[1])
+           # print(current[0]-1,end=" ")
+           # print(current[1])
         if current[0] < curry:
             neighbours.append((current[0]+1,current[1]))
-            print(current[0]+1,end=" ")
-            print(current[1])
+          #  print(current[0]+1,end=" ")
+          #  print(current[1])
         if current[1] > 0:
             neighbours.append((current[0],current[1]-1))
-            print(current[0],end=" ")
-            print(current[1]-1)
+          #  print(current[0],end=" ")
+          #  print(current[1]-1)
         if current[1] < currx:
             neighbours.append((current[0],current[1]+1))
-            print(current[0],end=" ")
-            print(current[1]+1)
+           # print(current[0],end=" ")
+           # print(current[1]+1)
         for i in neighbours: #for all the adjacent cells
             if i in closed: #if seen already,skip
                 continue
@@ -234,8 +255,8 @@ def get_action(view):
 
     item = {'a':'axe','o':'rock','k':'key'}
     if currentDest != () and currentPath != []:
-        print("my current destination is")
-        print(currentDest)
+        #print("my current destination is")
+        #print(currentDest)
         curMove = currentPath.pop(0)
         if curMove == 'f' and view[1][2] == '-':
             curMove = 'u'
@@ -257,14 +278,14 @@ def get_action(view):
 
     ### Water Movement
     if inRaft == 1:
-        print("IM IN A RAFT")
+        #print("IM IN A RAFT")
         goal = bfs_closest((playery,playerx),1)
         if goal != ['false']:
-            print("WATER GOAL")
-            print(goal)
+            #print("WATER GOAL")
+            #print(goal)
             goalTuple = (goal[0],goal[1])
             path = Astar((playery,playerx),goalTuple,0,0,1)
-            print(path)
+            #print(path)
             path1 = list(revPath(path))
             currentDest = goal
             currentPath = path1[1:]
@@ -320,8 +341,8 @@ def get_action(view):
                 stone = stone + 1
             moves.append(path1[0])
             currentPath = path1[1:]
-            print("added path")
-            print(path1)
+           # print("added path")
+           # print(path1)
             return path1[0]
         else:
             # no more paths left
@@ -333,7 +354,7 @@ def get_action(view):
             #    if 
 
             #optimal version
-            print("TREE")
+            #print("TREE")
             trees = {}
             entropy = analyse()
             for i in range(sizey):
@@ -346,19 +367,18 @@ def get_action(view):
             high = 0
             node = ()
             for i in trees:
-                print("ast")
                 if trees[i] > high:
                     node = i
                     high = trees[i]
             # tree is found
-            print("NODE")
-            print(node)
+            #print("NODE")
+            #print(node)
             if node != ():
                 path = Astar((playery,playerx),node,1)
-                print("XD")
-                print(path)
-                print(playery)
-                print(playerx)
+                #print("XD")
+                #print(path)
+                #print(playery)
+                #print(playerx)
                 path1 = list(revPath(path))
                 if len(path1) == 1:
                     move = 'c'
@@ -368,13 +388,30 @@ def get_action(view):
                 move = path1[0]
                 currentDest = node
                 currentPath = path1[1:]
+                moves.append(move)
+                return move
             else:
             # tree not found
                 pass
+            print("WALKABLE")
+            printMap(walkableView())
+            tiles = walkableView()
+            res = []
+            while res == []:
+                for i in tiles:
+                    if stoneBFS(i) != False:
+                        res = i
+                        break
+            
+
+
+                
+
+            
         raise NameError
     except NameError:
         while 1:
-            print('random')
+            #print('random')
             inp = random.randrange(6)
             if inp < 4:
                 move = 'f'
@@ -397,7 +434,7 @@ def get_action(view):
                 move = 'f'
                 stone = stone + 1
             if view[1][2] == '*' or view[1][2]== '.' or (view[1][2] == '~' and (stone == 0 and raft == 0)):
-                print('O a wall')
+                #print('O a wall')
                 x = random.randrange(2)
                 if view[2][1] == '*':
                     move = 'r'
@@ -417,13 +454,25 @@ def get_action(view):
             #time.sleep(0.25)
             moves.append(move)
             return move
-
+            
+def stoneBFS(rock):
+    global allview
+    test = copy.deepcopy(allview)
+    for i in rock:
+        allview[i[0]][i[1]] = ' '
+        if bfs_closest((playery,playerx)) != False:
+            allview = test
+            return rock
+        else:
+            allview = test
+            return False
+    
 def revPath(path):
     fpath = path[::-1]
 
-    print("FPATH")
-    print(fpath)
-    print(orientation)
+    # print("FPATH")
+    # print(fpath)
+    # print(orientation)
     curr = ()
     newP = ""
     for i in fpath:
@@ -442,7 +491,7 @@ def revPath(path):
                 else:
                     newP = newP + "L"
         curr = i
-    print(newP)
+    #print(newP)
     return turnToPath(newP,orientation)
 
 def walkable(view,x,y):
@@ -455,7 +504,7 @@ def walkable(view,x,y):
     if axe == 1:
         free['T'] = 'Tree'
     test[2][2] = '^'
-    print(orientation)
+    #print(orientation)
     while change == 1:
         change = 0
         for i in range(5):
@@ -517,57 +566,47 @@ def walkableView():
     test = copy.deepcopy(allview)
     change = 1
     free = {'o':'Stone','k':'Key','a':'Axe',' ':'Space', 'O':'placed_Stone'}
-    if key == 1:
-        free['-'] = 'Door'
-    if axe == 1:
-        free['T'] = 'Tree'
+    test[playery][playerx] = 'W'
+    water = []
     while change == 1:
         change = 0
         for i in range(sizey):
             for j in range(sizex):
-                check = re.sub('[RLUD]','',test[i][j])
-                if check == '^':
-                    if i < 4:
+                if test[i][j] == 'W':
+                    if i < curry:
                         if test[i+1][j] in free:
-                            test[i+1][j] = test[i][j] + 'D'
+                            test[i+1][j] ='W'
                             change = 1
                     if i > 0:
                         if test[i-1][j] in free:
-                            test[i-1][j] = test[i][j] + 'U'
+                            test[i-1][j] = 'W'
                             change = 1
-                    if j < 4:
+                    if j < currx:
                         if test[i][j+1] in free:
-                            test[i][j+1] = test[i][j] + 'R'
+                            test[i][j+1] = 'W'
                             change = 1
                     if j > 0:
                         if test[i][j-1] in free:
-                            test[i][j-1] = test[i][j] + 'L'
+                            test[i][j-1] = 'W'
                             change = 1
     # run once again but for '?'
-    free['?'] = 'unknown'
+    free = {'~':'water'}
     for i in range(sizey):
         for j in range(sizex):
-            check = re.sub('[RLUD]','',test[i][j])
-            if check == '^':
-                if i < 4:
+            if test[i][j]== 'W':
+                if i < curry:
                     if test[i+1][j] in free:
-                        test[i+1][j] = test[i][j] + 'D'
+                        water.append((i+1,j))
                 if i > 0:
                     if test[i-1][j] in free:
-                        test[i-1][j] = test[i][j] + 'U'
-                if j < 4:
+                        water.append((i-1,j))
+                if j < currx:
                     if test[i][j+1] in free:
-                        test[i][j+1] = test[i][j] + 'R'
+                        water.append((i,j+1))
                 if j > 0:
                     if test[i][j-1] in free:
-                        test[i][j-1] = test[i][j] + 'L'
-    for i in range(sizey):
-        for j in range(sizex):
-            if test[i][j].startswith('^'):
-                test[i][j] = turnToPath(test[i][j])
-            else:
-                test[i][j] = 'F'
-    return test
+                        water.append((i,j-1))
+    return water
 
 
 def rotate(dir, cur):
@@ -613,6 +652,7 @@ def print_grid(view):
     for ln in view:
         print("|"+str(ln[0])+str(ln[1])+str(ln[2])+str(ln[3])+str(ln[4])+"|")
     print('+-----+')
+    
 
 # function that gets given the view and the new x and y location of the player 
 # with respect to the old map that is to be replaced
@@ -642,7 +682,7 @@ def addView(view,x,y):
 
         # move right
         if x > playerx:
-            print('right')
+            # print('right')
             # check if allview needs to be expanded
             if x + 2 > currx:
                 # initiate new squares created with '?'
@@ -672,7 +712,7 @@ def addView(view,x,y):
                 
         # move left
         else:
-            print('left')
+            # print('left')
             # check if allview needs to be expanded
             if x - 2 < 0:
                 # initiate new squares created with '?'
@@ -705,7 +745,7 @@ def addView(view,x,y):
     elif y != playery:
         # move down
         if y > playery:
-            print('down')
+            # print('down')
             # check if allview needs to be expanded
             if y + 2 > curry:
                 # initiate new squares created with '?'
@@ -734,7 +774,7 @@ def addView(view,x,y):
             allview[playery][playerx] = 'v'
         # move up
         else:
-            print('up')
+            # print('up')
             # check if allview needs to be expanded
             if y - 2 < 0:
                 # initiate new squares created with '?'
@@ -941,7 +981,7 @@ if __name__ == "__main__":
                 j=0
                 i=(i+1)%5
         if j==0 and i==0:
-            print_grid(view) # COMMENT THIS OUT ON SUBMISSION
+            #print_grid(view) # COMMENT THIS OUT ON SUBMISSION
             raftB = raft
             action = get_action(view) # gets new actions
             if action == 'f' and view[1][2] == '~' and raftB != raft:
@@ -949,16 +989,16 @@ if __name__ == "__main__":
             step = {'O':'stone',' ':'land'}
             if action == 'f' and view[1][2] in step and inRaft == 1:
                 inRaft = 0
-            print("ACTION")
-            print(action)
-            printMap(allview)
-            print("--------")
-            printMap(exploreview)
-            print(axe)
-            print(key)
-            print(stone)
-            print("Raft",end="")
-            print(raft)
+            # print("ACTION")
+            # print(action)
+            # printMap(allview)
+            # print("--------")
+            # printMap(exploreview)
+            # print(axe)
+            # print(key)
+            # print(stone)
+            # print("Raft",end="")
+            # print(raft)
             sock.send(action.encode('utf-8'))
 
     sock.close()
