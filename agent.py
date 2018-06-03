@@ -162,7 +162,18 @@ def get_action(view):
     #print('------')
     global playerx
     global playery
-    if moves != [] and moves[-1] == 'f':
+    obstacle = {'T':'Tree','*':'Wall','-':'Door'}
+    if allview != [[]]:
+        # check tile in front of us
+        if orientation == 0:
+            front = allview[playery-1][playerx]
+        elif orientation == 1:
+            front = allview[playery][playerx+1]
+        elif orientation == 2:
+            front = allview[playery+1][playerx]
+        else:
+            front = allview[playery][playerx-1]
+    if moves != [] and moves[-1] == 'f' and front not in obstacle:
         if orientation == 0:
             addView(rotate,playerx,playery-1)
         elif orientation == 1:
