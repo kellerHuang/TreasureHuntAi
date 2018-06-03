@@ -243,6 +243,7 @@ def get_action(view):
     global allview
     global origin
     global treasure
+    print("DATA")
     print(origin)
     print(treasure)
     obstacle = {'T':'Tree','*':'Wall','-':'Door'}
@@ -315,7 +316,17 @@ def get_action(view):
         else:
             print("SWIM")
             printMap(swimmable())
-            #for i in swimmable():
+            for i in swimmable():
+                print(i)
+                print(checkResources(i))
+                if checkResources(i)[2] > 0:
+                    currentDest = i
+                    path = Astar((playery,playerx),i,0,0,1)
+                    path1 = list(revPath(path))
+                    currentPath = path1[1:]
+                    move = path1[0]
+                    moves.append(move)
+                    return move
                 
 
     resources = {'o':'Rock','k':'Key','a':'Axe'} 
@@ -494,68 +505,70 @@ def get_action(view):
 
 # checks resources on an island
 def checkResources(location):
-    change = 0
+    change = 1
     test = copy.deepcopy(allview)
     free = {'o': 'stone', 'T':'Tree','a':'axe',' ':'land','k':'key'}
     stones = 0
     trees = 0
     axes = 0
     keys = 0
-    allview[location[0]][location[1]] = 'C'
+    test[location[0]][location[1]] = 'C'
     while change == 1:
         change = 0
         for i in range(sizex):
             for j in range(sizey):
-                if allview[j][i] == 'C':
-                    if allview[j-1][i] in free:
-                        if allview[j-1][i] == 'o':
+                if test[j][i] == 'C':
+                    if test[j-1][i] in free:
+                        if test[j-1][i] == 'o':
                             stones = stones + 1
-                        if allview[j-1][i] == 'T':
+                        if test[j-1][i] == 'T':
                             trees = trees + 1
-                        if allview[j-1][i] == 'a':
+                        if test[j-1][i] == 'a':
                             axes = axes + 1
-                        if allview[j-1][i] == 'k':
+                        if test[j-1][i] == 'k':
                             keys = keys + 1
-                        allview[j-1][i] = 'C'
+                        test[j-1][i] = 'C'
                         change = 1
-                    if allview[j+1][i] in free:
-                        if allview[j+1][i] == 'o':
+                    if test[j+1][i] in free:
+                        if test[j+1][i] == 'o':
                             stones = stones + 1
-                        if allview[j+1][i] == 'T':
+                        if test[j+1][i] == 'T':
                             trees = trees + 1
-                        if allview[j+1][i] == 'a':
+                        if test[j+1][i] == 'a':
                             axes = axes + 1
-                        if allview[j+1][i] == 'k':
+                        if test[j+1][i] == 'k':
                             keys = keys + 1
-                        allview[j+1][i] = 'C'
+                        test[j+1][i] = 'C'
                         change = 1
-                    if allview[j][i-1] in free:
-                        if allview[j][i-1] == 'o':
+                    if test[j][i-1] in free:
+                        if test[j][i-1] == 'o':
                             stones = stones + 1
-                        if allview[j][i-1] == 'T':
+                        if test[j][i-1] == 'T':
                             trees = trees + 1
-                        if allview[j][i-1] == 'a':
+                        if test[j][i-1] == 'a':
                             axes = axes + 1
-                        if allview[j][i-1] == 'k':
+                        if test[j][i-1] == 'k':
                             keys = keys + 1
-                        allview[j][i-1] = 'C'
+                        test[j][i-1] = 'C'
                         change = 1
-                    if allview[j][i+1] in free:
-                        if allview[j][i+1] == 'o':
+                    if test[j][i+1] in free:
+                        if test[j][i+1] == 'o':
                             stones = stones + 1
-                        if allview[j][i+1] == 'T':
+                        if test[j][i+1] == 'T':
                             trees = trees + 1
-                        if allview[j][i+1] == 'a':
+                        if test[j][i+1] == 'a':
                             axes = axes + 1
-                        if allview[j][i+1] == 'k':
+                        if test[j][i+1] == 'k':
                             keys = keys + 1
-                        allview[j][i+1] = 'C'
+                        test[j][i+1] = 'C'
                         change = 1
+    return (axes,keys,trees,stones)
 
 def stoneBFS(rock):
     global allview
     test = copy.deepcopy(allview)
     for i in rock:
+        print("STONEBFS")
         print(i)
         allview[i[0]][i[1]] = ' '
         if bfs_closest((playery,playerx)) != False:
