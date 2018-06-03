@@ -228,6 +228,7 @@ def get_action(view):
     global axe
     global stone
     global raft
+    global allview
     obstacle = {'T':'Tree','*':'Wall','-':'Door'}
     if allview != [[]]:
         # check tile in front of us
@@ -278,7 +279,7 @@ def get_action(view):
 
     ### Water Movement
     if inRaft == 1:
-        #print("IM IN A RAFT")
+        print("IM IN A RAFT")
         goal = bfs_closest((playery,playerx),1)
         if goal != ['false']:
             #print("WATER GOAL")
@@ -292,6 +293,8 @@ def get_action(view):
             move = path1[0]
             moves.append(move)
             return move
+        else:
+            pass
 
     resources = {'o':'Rock','k':'Key','a':'Axe'} 
     if key > 0:
@@ -394,15 +397,25 @@ def get_action(view):
             # tree not found
                 pass
             print("WALKABLE")
-            printMap(walkableView())
+            print(walkableView())
             tiles = walkableView()
             res = []
-            while res == []:
-                for i in tiles:
-                    if stoneBFS(i) != False:
-                        res = i
-                        break
+            for i in tiles:
+                if stoneBFS([i]) != False:
+                    res = [i]
+                    break
+            p = []
+            for i in res:
+                test = copy.deepcopy(allview)
+                allview[i[0]][i[1]] = ' '
+                if Astar((playery,playerx),i) != False:
+                    p = Astar((playery,playerx),i)
+                    break
+                allview = test
             
+            if p != []:
+                sPath = list(revPath(p))
+                print(sPath)
 
 
                 
@@ -459,10 +472,11 @@ def stoneBFS(rock):
     global allview
     test = copy.deepcopy(allview)
     for i in rock:
+        print(i)
         allview[i[0]][i[1]] = ' '
         if bfs_closest((playery,playerx)) != False:
             allview = test
-            return rock
+            return True
         else:
             allview = test
             return False
@@ -981,7 +995,7 @@ if __name__ == "__main__":
                 j=0
                 i=(i+1)%5
         if j==0 and i==0:
-            #print_grid(view) # COMMENT THIS OUT ON SUBMISSION
+            print_grid(view) # COMMENT THIS OUT ON SUBMISSION
             raftB = raft
             action = get_action(view) # gets new actions
             if action == 'f' and view[1][2] == '~' and raftB != raft:
@@ -989,16 +1003,16 @@ if __name__ == "__main__":
             step = {'O':'stone',' ':'land'}
             if action == 'f' and view[1][2] in step and inRaft == 1:
                 inRaft = 0
-            # print("ACTION")
-            # print(action)
-            # printMap(allview)
-            # print("--------")
-            # printMap(exploreview)
-            # print(axe)
-            # print(key)
-            # print(stone)
-            # print("Raft",end="")
-            # print(raft)
+            print("ACTION")
+            print(action)
+            printMap(allview)
+            print("--------")
+            printMap(exploreview)
+            print(axe)
+            print(key)
+            print(stone)
+            print("Raft",end="")
+            print(raft)
             sock.send(action.encode('utf-8'))
 
     sock.close()
