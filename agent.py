@@ -213,6 +213,7 @@ def get_action(view):
     #print("ANALYSIS")
     coord = [] #the coordinates of the nearest unvisited cell
     result = bfs_closest(coord) #stores the nearest unvisited cell coordinates, returns false if no such cell
+    print("res")
     print(result)
     try:
         if low < 6: #if there is an immediately reachable resource
