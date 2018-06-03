@@ -22,10 +22,12 @@ allview = [[]]
 #2d matrix representing where we have been
 exploreview = [[]]
 stone = 0
+usedStone = 0
 axe = 0
 raft = 0
 key = 0
 orientation = 0
+inRaft = 0
 # curr is a rotated view
 # a and b are the x and y co-ordinates of the middle tile of the view
 
@@ -63,17 +65,20 @@ def rotateMatrix(mat):
             # assign temp to left
             mat[5-1-y][x] = temp
 
-def bfs_closest(coord,trees = 0):
+def bfs_closest(coord,water = 0):
     Queue = [[coord[0], coord[1]]] #cells to be expanded
     seen = [] #cells already expanded
-    obstacles = {'*':'Wall','T':'Tree','-':'Door','~':'Water'}
+    obstacles = {'*':'Wall','T':'Tree','-':'Door','~':'Water','.':'OOB'}
+    goal = ' '
     if key != 0:
         obstacles.pop('-', None)
-    if trees == 1:
-        obstacles.pop('T', None)
+    if water == 1:
+        obstacles.pop('W', None)
+        obstacles[' '] = 'Land'
+        goal = '~'
     while Queue != []:
         coord = Queue.pop(0) #take the first node in the queue
-        if exploreview[coord[0]][coord[1]] == ' ':
+        if exploreview[coord[0]][coord[1]] == goal:
             return coord #if it is empty, we have found out closest empty node
         elif allview[coord[0]][coord[1]] in obstacles:
             seen.append([coord[0], coord[1]]) #if it is not visitable unless using resources, ignore
@@ -90,14 +95,9 @@ def bfs_closest(coord,trees = 0):
             if [coord[0] + 1, coord[1]] not in seen:
                 seen.append([coord[0]+1, coord[1]])
                 Queue.append([coord[0]+1, coord[1]]) 
-
-    print("FALSE")
     return ['false']  #if none found, return false
 
-def Astar(player, coord, tree = 0, door = 0): #generic astar function, same as psuedo code on wikipedia
-    print("ASTAR **************************")
-    print(player)
-    print(coord)
+def Astar(player, coord, tree = 0, door = 0, water = 0): #generic astar function, same as psuedo code on wikipedia
     closed = [] #set of nodes already seen
     neighbours = [(player[0]-1, player[1]), (player[0]+1, player[1]), (player[0], player[1]+1), (player[0], player[1]-1)] #all possible adjacent cells
     open = [(player[0], player[1])] #set of nodes yet to be expanded
@@ -111,6 +111,9 @@ def Astar(player, coord, tree = 0, door = 0): #generic astar function, same as p
         obstacles.pop('T')
     if door == 1:
         obstacles.pop('-')
+    if water == 1:
+        obstacles.pop('~')
+        obstacles[' '] = 'land'
     while open != []:
         current = open[0]
         for i in open:
@@ -147,8 +150,6 @@ def Astar(player, coord, tree = 0, door = 0): #generic astar function, same as p
             if tent >= gscore[i]: #check if this distance is shorter than the previous
                 continue #if not, ignore
             cameFrom[i] = current #otherwise, update where this node came from
-            if i == (6,4):
-                print("ADDED")
             gscore[i] = tent
             fscore[i] = gscore[i] + math.sqrt(abs(current[0] - coord[0])**2 + abs(current[1] - coord[1])**2)
 
@@ -219,16 +220,15 @@ def get_action(view):
     else:
         addView(rotate,playerx,playery)
     exploreview[playery][playerx] = 'v' #set position to visited
-    # print("ALLVIEW")
-    # printMap(allview)
-    # print(orientation)
-    # print("------------------")
+
+
     item = {'a':'axe','o':'rock','k':'key'}
     if currentDest != () and currentPath != []:
         curMove = currentPath.pop(0)
         if curMove == 'f' and view[1][2] == '-':
             curMove = 'u'
         if curMove == 'f' and view[1][2] == 'T':
+            raft = 1
             curMove = 'c'
         if curMove == 'f' and view[1][2] in item:
             z = view[1][2]
@@ -242,8 +242,14 @@ def get_action(view):
         return curMove
     if currentPath == []:
         currentDest = ()
-    #printMap(exploreview)
-    
+
+    ### Water Movement
+    if inRaft == 1:
+        print("IM IN A RAFT")
+        goal = bfs_closest((playery,playerx),1)
+        print("WATER GOAL")
+        print(goal)
+
     resources = {'o':'Rock','k':'Key','a':'Axe'} 
     if key > 0:
         resources['-'] = 'Door'
@@ -333,6 +339,7 @@ def get_action(view):
                 path1 = list(revPath(path))
                 if len(path1) == 1:
                     move = 'c'
+                    raft = 1
                     moves.append('c')
                     return move
                 move = path1[0]
@@ -383,7 +390,7 @@ def get_action(view):
                 if stone > 0:
                     stone = stone - 1
                 else:
-                    raft = raft - 1
+                    raft = 0
             #time.sleep(0.25)
             moves.append(move)
             return move
@@ -595,12 +602,13 @@ def addView(view,x,y):
     global exploreview
     global sizex
     global sizey
+    obstacle = {'T':'Tree','*':'Wall','.':'OOB'}
     if allview == [[]]:
         allview = copy.deepcopy(view)
         exploreview = copy.deepcopy(view) #copy the initial 5x5 view 
         for i in range(5):
             for j in range(5):
-                if exploreview[i][j] == '*' or exploreview[i][j] == 'T': #if the cell is a wall
+                if exploreview[i][j] in obstacle: #if the cell is a wall
                     exploreview[i][j] = 'v' #mark it as visited
                 else:
                     exploreview[i][j] == ' ' #all other cells are unvisited
@@ -623,13 +631,15 @@ def addView(view,x,y):
             for i in range(5):
                 # replace squares
                 allview[playery - 2 + i][playerx + 3] = view[i][4]
-                if view[i][4] == '*' or view[i][4] == 'T' or exploreview[playery - 2 + i][playerx + 3] == 'v': #if the new cell being added is a wall
+                if view[i][4] in obstacle or exploreview[playery - 2 + i][playerx + 3] == 'v': #if the new cell being added is a wall
                     exploreview[playery - 2 + i][playerx + 3] = 'v' #mark it as visited
                 else:
                     exploreview[playery - 2 + i][playerx + 3] = ' ' #otherwise mark it as unvisited               
             # change player location
             if view[2][1] == 'O':
                 allview[playery][playerx] = 'O'
+            if view[2][1] == '~':
+                allview[playery][playerx] = '~'
             else:                 
             # change so that rocks can be found
                 allview[playery][playerx] = ' '
@@ -652,7 +662,7 @@ def addView(view,x,y):
             for i in range(5):
                 # replace squares
                 allview[playery - 2 + i][playerx - 3] = view[i][0]
-                if view[i][0] == '*' or view[i][0] == 'T' or exploreview[playery - 2 + i][playerx - 3] == 'v': #same as above
+                if view[i][0] in obstacle or exploreview[playery - 2 + i][playerx - 3] == 'v': #same as above
                     exploreview[playery - 2 + i][playerx - 3] = 'v'
                 else:
                     exploreview[playery - 2 + i][playerx - 3] = ' '                                  
@@ -660,6 +670,8 @@ def addView(view,x,y):
             if view[2][3] == 'O':
                 allview[playery][playerx] = 'O'                 
             # checks if previous step is stone
+            if view[2][3] == '~':
+                allview[playery][playerx] = '~' 
             else:
             # moved playerx to account for new column
                 allview[playery][playerx] = ' '
@@ -682,14 +694,16 @@ def addView(view,x,y):
             for i in range(5):
                 # replace squares
                 allview[playery + 3][playerx - 2 + i] = view[4][i]
-                if view[4][i] == '*' or view[4][i] == 'T' or exploreview[playery + 3][playerx - 2 + i] == 'v': #same as above
+                if view[4][i] in obstacle or exploreview[playery + 3][playerx - 2 + i] == 'v': #same as above
                     exploreview[playery + 3][playerx - 2 + i] = 'v'
                 else:
                     exploreview[playery + 3][playerx - 2 + i] = ' '                
             # change player location 
             if view[1][2] == 'O':
-                allview[playery][playerx] = 'O'                 
+                allview[playery][playerx] = 'O'             
             # change so that rocks can be found
+            if view[1][2] == '~':
+                allview[playery][playerx] = '~'  
             else:
                 allview[playery][playerx] = ' '
             # updates to playerx and playery
@@ -712,13 +726,15 @@ def addView(view,x,y):
             for i in range(5):
                 # replace squares
                 allview[playery - 3][playerx - 2 + i] = view[0][i]
-                if view[0][i] == '*' or view[0][i] == 'T' or exploreview[playery - 3][playerx - 2 + i] == 'v': #same as above
+                if view[0][i] in obstacle or exploreview[playery - 3][playerx - 2 + i] == 'v': #same as above
                     exploreview[playery - 3][playerx - 2 + i] = 'v'
                 else:
                     exploreview[playery - 3][playerx - 2 + i] = ' '                
             # change player location
             if view[3][2] == 'O':
-                allview[playery][playerx] = 'O'                 
+                allview[playery][playerx] = 'O'     
+            if view[3][2] == '~':
+                allview[playery][playerx] = '~'                
             # check if previous step was on a stone
             else:
             # moved playerx to account for new column
@@ -903,7 +919,13 @@ if __name__ == "__main__":
                 i=(i+1)%5
         if j==0 and i==0:
             print_grid(view) # COMMENT THIS OUT ON SUBMISSION
+            raftB = raft
             action = get_action(view) # gets new actions
+            if action == 'f' and view[1][2] == '~' and raftB != raft:
+                inRaft = 1
+            step = {'O':'stone',' ':'land'}
+            if action == 'f' and view[1][2] in step and inRaft == 1:
+                inRaft = 0
             print("ACTION")
             print(action)
             printMap(allview)
@@ -912,6 +934,8 @@ if __name__ == "__main__":
             print(axe)
             print(key)
             print(stone)
+            print("Raft",end="")
+            print(raft)
             sock.send(action.encode('utf-8'))
 
     sock.close()
