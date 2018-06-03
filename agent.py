@@ -173,6 +173,7 @@ def get_action(view):
             addView(rotate,playerx-1,playery)
     else:
         addView(rotate,playerx,playery)
+    exploreview[playery][playerx] = 'v' #set position to visited
     printMap(allview)
     print("------------------")
     printMap(exploreview)
@@ -217,7 +218,6 @@ def get_action(view):
             if view[1][2] == 'T' and axe == 1 and move == 'f':
                 raft = raft + 1
                 moves.append('c')
-                exploreview[playery][playerx] = 'v' #set current position to visited. This happens before every move return.
                 return 'c'
             if view[1][2] == 'a' and axe == 0 and move == 'f':
                 axe = 1
@@ -230,7 +230,6 @@ def get_action(view):
             if view[1][2] == 'o' and move == 'f':
                 stone = stone + 1
             moves.append(path[0])
-            exploreview[playery][playerx] = 'v' #set position to visited
             return path1[0]
         raise NameError
     except NameError:
@@ -277,7 +276,6 @@ def get_action(view):
                     raft = raft - 1
             time.sleep(0.25)
             moves.append(move)
-            exploreview[playery][playerx] = 'v' #set position to visited
             return move
 
 def revPath(path):
