@@ -100,7 +100,7 @@ def Astar(player, coord): #generic astar function, same as psuedo code on wikipe
             print("AAAAAAAA")
             return reconstruct_path(cameFrom, current)
         open.remove(current) 
-        close.append(current)
+        closed.append(current)
         if allview[current[0]][current[1]] == '*' or allview[current[0]][current[1]] == 'T' or allview[current[0]][current[1]] == '-' or \
            allview[current[0]][current[1]] == '~':
             continue #if requires resources or unvisitable, skip
@@ -118,7 +118,7 @@ def Astar(player, coord): #generic astar function, same as psuedo code on wikipe
                 continue #if not, ignore
             cameFrom[i] = current #otherwise, update where this node came from
             gscore[i] = tent
-            fscore[i] = gscore[i] + sqrt(abs(player[0] - coord[0])**2 + abs(player[1] - coord[1])**2)
+            fscore[i] = gscore[i] + math.sqrt(abs(player[0] - coord[0])**2 + abs(player[1] - coord[1])**2)
     return False #if not found, return false
 
 def reconstruct_path(cameFrom, current): #backtrace function
