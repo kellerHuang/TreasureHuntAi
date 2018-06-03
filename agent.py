@@ -410,12 +410,19 @@ def get_action(view):
                 allview[i[0]][i[1]] = ' '
                 if Astar((playery,playerx),i) != False:
                     p = Astar((playery,playerx),i)
+                    allview = test
                     break
                 allview = test
             
             if p != []:
                 sPath = list(revPath(p))
+                print("PATH FOUND")
                 print(sPath)
+                currentDest = res[0]
+                currentPath = sPath[1:]
+                move = sPath[0]
+                moves.append(move)
+                return move
 
 
                 
@@ -480,7 +487,7 @@ def stoneBFS(rock):
         else:
             allview = test
             return False
-    
+
 def revPath(path):
     fpath = path[::-1]
 
@@ -1003,6 +1010,8 @@ if __name__ == "__main__":
             step = {'O':'stone',' ':'land'}
             if action == 'f' and view[1][2] in step and inRaft == 1:
                 inRaft = 0
+            print("currentDest")
+            print(currentDest)
             print("ACTION")
             print(action)
             printMap(allview)
