@@ -94,7 +94,9 @@ def bfs_closest(coord,trees = 0):
     print("FALSE")
     return ['false']  #if none found, return false
 
-def Astar(player, coord): #generic astar function, same as psuedo code on wikipedia
+def Astar(player, coord, tree = 0, door = 0): #generic astar function, same as psuedo code on wikipedia
+    print(player)
+    print(coord)
     closed = [] #set of nodes already seen
     neighbours = [(player[0]-1, player[1]), (player[0]+1, player[1]), (player[0], player[1]+1), (player[0], player[1]-1)] #all possible adjacent cells
     open = [(player[0], player[1])] #set of nodes yet to be expanded
@@ -103,6 +105,12 @@ def Astar(player, coord): #generic astar function, same as psuedo code on wikipe
     gscore[(player[0], player[1])] = 0
     fscore = {} #cost of getting from    start node to that node. Requires heuristic
     fscore[(player[0], player[1])] = math.sqrt(abs(player[0] - coord[0])**2 + abs(player[1] - coord[1])**2) #birds eye distance as heuristic
+    obstacles = {'*':'wall','T':'tree','-':'door','~':'water'}
+    if tree == 1:
+        obstacles.pop('T')
+        print("popped")
+    if door == 1:
+        obstacles.pop('-')
     while open != []:
         current = open[0]
         for i in open:
@@ -115,8 +123,7 @@ def Astar(player, coord): #generic astar function, same as psuedo code on wikipe
         # print(current)
         open.remove(current) 
         closed.append(current)
-        if allview[current[0]][current[1]] == '*' or allview[current[0]][current[1]] == 'T' or allview[current[0]][current[1]] == '-' or \
-           allview[current[0]][current[1]] == '~':
+        if allview[current[0]][current[1]] in obstacles:
             continue #if requires resources or unvisitable, skip
         neighbours = []
         if current[0] > 0:
@@ -216,7 +223,9 @@ def get_action(view):
     if currentDest != () and currentPath != []:
         curMove = currentPath.pop(0)
         if curMove == 'f' and view[1][2] == '-':
-            curMove == 'u'
+            curMove = 'u'
+        if curMove == 'f' and view[1][2] == 'T':
+            curMove = 'c'
         if curMove == 'f' and view[1][2] in item:
             z = view[1][2]
             if z == 'a':
@@ -263,18 +272,24 @@ def get_action(view):
 #            print(path1)
         if path1[0] != 'F':
             #time.sleep(0.25)
+            move = path1[0]
             if view[1][2] == 'T' and axe == 1 and move == 'f':
-                raft = raft + 1
+                raft =  1
+                print("abcdef")
                 moves.append('c')
                 return 'c'
             if view[1][2] == 'a' and axe == 0 and move == 'f':
+                print("abcdef")
                 axe = 1
             if view[1][2] == 'k' and key == 0 and move == 'f':
+                print("abcdef")
                 key = 1
             if view[1][2] == '-' and key == 1 and move == 'f':
+                print("abcdef")
                 moves.append('u')
                 return 'u'
             if view[1][2] == 'o' and move == 'f':
+                print("abcdef")
                 stone = stone + 1
             moves.append(path1[0])
             currentPath = path1[1:]
@@ -290,23 +305,41 @@ def get_action(view):
             #    if 
 
             #optimal version
+            print("TREE")
             trees = {}
             entropy = analyse()
             for i in range(sizey):
                 for j in range(sizex):
-                    if allview[i][j] == 'T' and Astar([playery,playerx],[i,j]) != False:
-                        trees[(i,j)] = entropy[i][j]
+                    if allview[i][j] == 'T':
+                        print(Astar([playery,playerx],[i,j],1))
+                        if Astar([playery,playerx],[i,j],1) != False:
+                            print("FFFF")
+                            trees[(i,j)] = entropy[i][j]
             
             # sort by entropy
             high = 0
             node = ()
             for i in trees:
+                print("ast")
                 if trees[i] > high:
                     node = i
                     high = trees[i]
             # tree is found
+            print("NODE")
+            print(node)
             if node != ():
+                path = Astar((playery,playerx),node,1)
+                path1 = list(revPath(path))
+                if len(path1) == 1:
+                    move = 'c'
+                    moves.append('c')
+                    return move
+                move = path1[0]
+                currentDest = node
+                currentPath = path1[1:]
             else:
+            # tree not found
+                pass
         raise NameError
     except NameError:
         while 1:
