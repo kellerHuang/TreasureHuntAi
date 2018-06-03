@@ -63,12 +63,14 @@ def rotateMatrix(mat):
             # assign temp to left
             mat[5-1-y][x] = temp
 
-def bfs_closest(coord):
-    Queue = [[playery, playerx]] #cells to be expanded
+def bfs_closest(coord,trees = 0):
+    Queue = [[coord[0], coord[1]]] #cells to be expanded
     seen = [] #cells already expanded
     obstacles = {'*':'Wall','T':'Tree','-':'Door','~':'Water'}
     if key != 0:
         obstacles.pop('-', None)
+    if trees == 1:
+        obstacles.pop('T', None)
     while Queue != []:
         coord = Queue.pop(0) #take the first node in the queue
         if exploreview[coord[0]][coord[1]] == ' ':
@@ -242,7 +244,7 @@ def get_action(view):
                     x = j  
                     low = abs(i-1) + abs(j-2)
 
-    coord = [] #the coordinates of the nearest unvisited cell
+    coord = (playery,playerx) #the coordinates of the nearest unvisited cell
     result = bfs_closest(coord) #stores the nearest unvisited cell coordinates, returns false if no such cell
     # print("res")
     # print(result)
@@ -258,7 +260,6 @@ def get_action(view):
 #            print(path)
             path1 = list(revPath(path))
 #            print(path1)
-            #TODO TURN IT INTO PATH1. RN ASTAR RETURNS THE PATH IN REVERSE. TURN INTO ACTIONS TO PASS INTO THE LINE BELOW vvv
         if path1[0] != 'F':
             #time.sleep(0.25)
             if view[1][2] == 'T' and axe == 1 and move == 'f':
@@ -279,7 +280,25 @@ def get_action(view):
             print(path1)
             return path1[0]
         else:
+            # no more paths left
             currentDest = ()
+            # see if there's any trees to cut
+            #result = bfs_closest((playery,playerx),1)
+            # check if we found a tree to cut   
+            #if result != ['false']:
+            #    if 
+
+            #optimal version
+            trees = {}
+            entropy = analyse()
+            for i in range(sizey):
+                for j in range(sizex):
+                    if allview[i][j] == 'T' and Astar((playery,playerx),(i,j)) != False:
+                        trees[(i,j)] = entropy[i][j]
+            
+            # sort by entropy
+
+
         raise NameError
     except NameError:
         while 1:
