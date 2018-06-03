@@ -289,6 +289,8 @@ def get_action(view):
                 key = 1
             else:
                 stone = stone + 1
+        if curMove == 'f' and view[1][2] == '~' and stone == 0:
+            raft = 0
         if curMove == 'f' and view[1][2] == '~' and stone > 0:
             stone = stone-1
         moves.append(curMove)
@@ -348,11 +350,15 @@ def get_action(view):
     # print("res")
     # print(result)
     try:
+        path1 = 'False'
         if low < 6: #if there is an immediately reachable resource
+            print("ADDED")
             currentDest = (y,x)
             path = walkable(view,x,y)
             path1 = list(path)
+            print(path1)
         elif result[0] != 'false': #if there is an unvisited cell
+            print("ADDDEEEED")
             res_coord = (result[0], result[1])
             path = Astar([playery, playerx], res_coord) #astar returns the path from current player position to coord   
             currentDest = res_coord        
@@ -422,6 +428,7 @@ def get_action(view):
                     moves.append('c')
                     return move
                 move = path1[0]
+                print("AD")
                 currentDest = node
                 currentPath = path1[1:]
                 moves.append(move)
@@ -641,7 +648,7 @@ def walkable(view,x,y):
 
     check = re.sub('[RLUD]','',test[y][x])
     if check == '^':
-        return turnToPath(rotPath(test[y][x]))
+        return turnToPath(test[y][x])
     else:
         return 'False'
 
