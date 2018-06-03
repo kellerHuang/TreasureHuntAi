@@ -231,7 +231,7 @@ def get_action(view):
                 stone = stone + 1
             moves.append(path[0])
             exploreview[playery][playerx] = 'v' #set position to visited
-            return path[0]
+            return path1[0]
         raise NameError
     except NameError:
         while 1:
@@ -769,6 +769,8 @@ if __name__ == "__main__":
         if j==0 and i==0:
             print_grid(view) # COMMENT THIS OUT ON SUBMISSION
             action = get_action(view) # gets new actions
+            print("ACTION")
+            print(action)
             sock.send(action.encode('utf-8'))
 
     sock.close()
