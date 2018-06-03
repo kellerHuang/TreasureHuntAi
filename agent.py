@@ -304,9 +304,9 @@ def get_action(view):
                 if trees[i] > high:
                     node = i
                     high = trees[i]
-
-            #if node != ():
-            #else:
+            # tree is found
+            if node != ():
+            else:
         raise NameError
     except NameError:
         while 1:
