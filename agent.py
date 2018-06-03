@@ -488,7 +488,7 @@ def addView(view,x,y):
         exploreview = copy.deepcopy(view) #copy the initial 5x5 view 
         for i in range(5):
             for j in range(5):
-                if exploreview[i][j] == '*': #if the cell is a wall
+                if exploreview[i][j] == '*' or exploreview[i][j] == 'T': #if the cell is a wall
                     exploreview[i][j] = 'v' #mark it as visited
                 else:
                     exploreview[i][j] == ' ' #all other cells are unvisited
@@ -511,7 +511,7 @@ def addView(view,x,y):
             for i in range(5):
                 # replace squares
                 allview[playery - 2 + i][playerx + 3] = view[i][4]
-                if view[i][4] == '*' or exploreview[playery - 2 + i][playerx + 3] == 'v': #if the new cell being added is a wall
+                if view[i][4] == '*' or view[i][4] == 'T' or exploreview[playery - 2 + i][playerx + 3] == 'v': #if the new cell being added is a wall
                     exploreview[playery - 2 + i][playerx + 3] = 'v' #mark it as visited
                 else:
                     exploreview[playery - 2 + i][playerx + 3] = ' ' #otherwise mark it as unvisited               
@@ -540,7 +540,7 @@ def addView(view,x,y):
             for i in range(5):
                 # replace squares
                 allview[playery - 2 + i][playerx - 3] = view[i][0]
-                if view[i][0] == '*' or exploreview[playery - 2 + i][playerx - 3] == 'v': #same as above
+                if view[i][0] == '*' or view[i][0] == 'T' or exploreview[playery - 2 + i][playerx - 3] == 'v': #same as above
                     exploreview[playery - 2 + i][playerx - 3] = 'v'
                 else:
                     exploreview[playery - 2 + i][playerx - 3] = ' '                                  
@@ -570,7 +570,7 @@ def addView(view,x,y):
             for i in range(5):
                 # replace squares
                 allview[playery + 3][playerx - 2 + i] = view[4][i]
-                if view[4][i] == '*' or exploreview[playery + 3][playerx - 2 + i] == 'v': #same as above
+                if view[4][i] == '*' or view[4][i] == 'T' or exploreview[playery + 3][playerx - 2 + i] == 'v': #same as above
                     exploreview[playery + 3][playerx - 2 + i] = 'v'
                 else:
                     exploreview[playery + 3][playerx - 2 + i] = ' '                
@@ -600,7 +600,7 @@ def addView(view,x,y):
             for i in range(5):
                 # replace squares
                 allview[playery - 3][playerx - 2 + i] = view[0][i]
-                if view[0][i] == '*' or exploreview[playery - 3][playerx - 2 + i] == 'v': #same as above
+                if view[0][i] == '*' or view[0][i] == 'T' or exploreview[playery - 3][playerx - 2 + i] == 'v': #same as above
                     exploreview[playery - 3][playerx - 2 + i] = 'v'
                 else:
                     exploreview[playery - 3][playerx - 2 + i] = ' '                
