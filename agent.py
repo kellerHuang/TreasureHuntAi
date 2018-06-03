@@ -49,6 +49,8 @@ raft = 0
 key = 0
 orientation = 0
 inRaft = 0
+origin = []
+treasure = []
 # curr is a rotated view
 # a and b are the x and y co-ordinates of the middle tile of the view
 
@@ -187,7 +189,16 @@ def Astar(player, coord, tree = 0, door = 0, water = 0): #generic astar function
             fscore[i] = gscore[i] + math.sqrt(abs(current[0] - coord[0])**2 + abs(current[1] - coord[1])**2)
 
     return False #if not found, return false
-
+def path_back(origin, treasure):
+    count = 0
+    path = Astar(treasure, origin, 1, 1, 1)
+    if len(path) == 1:
+        return path
+    for i in range(1, len(path)):
+        if allview[path[i][0]][path[i][1]] == '~' and allview[path[i-1][0]][path[i-1][1]] == ' ':
+            count = count + 1
+     
+    
 def reconstruct_path(cameFrom, current): #backtrace function
     total_path = [current] 
     while current in cameFrom:
@@ -229,6 +240,10 @@ def get_action(view):
     global stone
     global raft
     global allview
+    global origin
+    global treasure
+    print(origin)
+    print(treasure)
     obstacle = {'T':'Tree','*':'Wall','-':'Door'}
     if allview != [[]]:
         # check tile in front of us
@@ -422,12 +437,7 @@ def get_action(view):
                 currentPath = sPath[1:]
                 move = sPath[0]
                 moves.append(move)
-                return move
-
-
-                
-
-            
+                return move            
         raise NameError
     except NameError:
         while 1:
@@ -686,6 +696,8 @@ def addView(view,x,y):
     global exploreview
     global sizex
     global sizey
+    global origin
+    global treasure
     obstacle = {'T':'Tree','*':'Wall','.':'OOB'}
     if allview == [[]]:
         allview = copy.deepcopy(view)
@@ -696,11 +708,14 @@ def addView(view,x,y):
                     exploreview[i][j] = 'v' #mark it as visited
                 else:
                     exploreview[i][j] == ' ' #all other cells are unvisited
+                if view[i][j] == 'T':
+                    treasure = [i, j]
+
+        origin = [2, 2]
         return
     findPlayer(allview)
     # horizontal move
     if x != playerx:
-
         # move right
         if x > playerx:
             # print('right')
@@ -715,6 +730,8 @@ def addView(view,x,y):
             for i in range(5):
                 # replace squares
                 allview[playery - 2 + i][playerx + 3] = view[i][4]
+                if view[i][4] == 'T':
+                    treasure = [playery-2+i, playerx+3]
                 if view[i][4] in obstacle or exploreview[playery - 2 + i][playerx + 3] == 'v': #if the new cell being added is a wall
                     exploreview[playery - 2 + i][playerx + 3] = 'v' #mark it as visited
                 else:
@@ -742,10 +759,15 @@ def addView(view,x,y):
                 playerx = playerx + 1
                 currx = currx + 1
                 sizex = sizex + 1
+                origin = [origin[0], origin[1] + 1]
             # check allview and replace squares since replacing older squares dont matter for correctness
             for i in range(5):
                 # replace squares
                 allview[playery - 2 + i][playerx - 3] = view[i][0]
+                if treasure != [] and view[i][0] == 'T':
+                    treasure = [treasure[0], treasure[1]+1]
+                elif view[i][0] == 'T':
+                    treasure = [playery-2+i, playerx-3]
                 if view[i][0] in obstacle or exploreview[playery - 2 + i][playerx - 3] == 'v': #same as above
                     exploreview[playery - 2 + i][playerx - 3] = 'v'
                 else:
@@ -777,6 +799,8 @@ def addView(view,x,y):
             # check allview and replace squares since replacing older squares dont matter for correctness
             for i in range(5):
                 # replace squares
+                if view[4][i] == 'T':
+                    treasure = [playery+3, playerx-2+i]
                 allview[playery + 3][playerx - 2 + i] = view[4][i]
                 if view[4][i] in obstacle or exploreview[playery + 3][playerx - 2 + i] == 'v': #same as above
                     exploreview[playery + 3][playerx - 2 + i] = 'v'
@@ -801,14 +825,17 @@ def addView(view,x,y):
                 # initiate new squares created with '?'
                 allview = addStartRow(allview,sizex,sizey,'?')
                 exploreview = addStartRow(exploreview,sizex,sizey,' ')
-                # TODO TURN THE ? into ' '
-                # ^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+                origin = [origin[0] + 1, origin[1]]
                 playery = playery + 1
                 curry = curry + 1
                 sizey = sizey + 1
             # check allview and replace squares since replacing older squares dont matter for correctness
             for i in range(5):
-                # replace squares
+                # replace square
+                if treasure != [] and view[4][i] == 'T':
+                    treasure = [treasure[0]+1, treasure[1]]
+                elif view[4][i] == 'T':
+                    treasure = [playery-3, playerx-2+i]
                 allview[playery - 3][playerx - 2 + i] = view[0][i]
                 if view[0][i] in obstacle or exploreview[playery - 3][playerx - 2 + i] == 'v': #same as above
                     exploreview[playery - 3][playerx - 2 + i] = 'v'
