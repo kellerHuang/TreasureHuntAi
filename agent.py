@@ -87,7 +87,9 @@ def bfs_closest(coord):
                 Queue.append([coord[0], coord[1]+1])
             if [coord[0] + 1, coord[1]] not in seen:
                 seen.append([coord[0]+1, coord[1]])
-                Queue.append([coord[0], coord[1]]) 
+                Queue.append([coord[0]+1, coord[1]]) 
+
+    print("FALSE")
     return ['false']  #if none found, return false
 
 def Astar(player, coord): #generic astar function, same as psuedo code on wikipedia
@@ -176,6 +178,10 @@ def get_action(view):
     #print('------')
     global playerx
     global playery
+    global key
+    global axe
+    global stone
+    global raft
     obstacle = {'T':'Tree','*':'Wall','-':'Door'}
     if allview != [[]]:
         # check tile in front of us
@@ -203,19 +209,24 @@ def get_action(view):
     # printMap(allview)
     # print(orientation)
     # print("------------------")
+    item = {'a':'axe','o':'rock','k':'key'}
     if currentDest != () and currentPath != []:
         curMove = currentPath.pop(0)
         if curMove == 'f' and view[1][2] == '-':
             curMove == 'u'
+        if curMove == 'f' and view[1][2] in item:
+            z = view[1][2]
+            if z == 'a':
+                axe = 1
+            elif z == 'k':
+                key = 1
+            else:
+                stone = stone + 1
         moves.append(curMove)
         return curMove
     if currentPath == []:
         currentDest = ()
     #printMap(exploreview)
-    global key
-    global axe
-    global stone
-    global raft
     
     resources = {'o':'Rock','k':'Key','a':'Axe'} 
     if key > 0:
@@ -662,24 +673,24 @@ def addView(view,x,y):
     #update the changes
         if playerOri == '^':
             if view[1][2] == ' ' and allview[playery-1][playerx] == '-':
-                allview[playery-1][playerx] == ' '
+                allview[playery-1][playerx] = ' '
             elif view[1][2] == ' ' and allview[playery-1][playerx] == 'T':
-                allview[playery-1][playerx] == ' ' 
-        elif playerOri == 'v': 
+                allview[playery-1][playerx] = ' ' 
+        elif playerOri == 'v':
             if view[3][2] == ' ' and allview[playery+1][playerx] == '-':
-                allview[playery+1][playerx] == ' '
+                allview[playery+1][playerx] = ' '
             elif view[3][2] == ' ' and allview[playery+1][playerx] == 'T':
-                allview[playery+1][playerx] == ' '
+                allview[playery+1][playerx] = ' '
         elif playerOri == '<':
             if view[2][1] == ' ' and allview[playery][playerx-1] == '-':
-                allview[playery][playerx-1] == ' '
+                allview[playery][playerx-1] = ' '
             elif view[2][1] == ' ' and allview[playery][playerx-1] == 'T':
-                allview[playery][playerx-1] == ' '
+                allview[playery][playerx-1] = ' '
         elif playerOri == '^':
             if view[2][3] == ' ' and allview[playery][playerx+1] == '-':
-                allview[playery][playerx+1] == ' '
+                allview[playery][playerx+1] = ' '
             elif view[2][3] == ' ' and allview[playery][playerx+1] == 'T':
-                allview[playery][playerx+1] == ' '
+                allview[playery][playerx+1] = ' '
         else:
             pass
         parse = {0:'^',1:'>',2:'v',3:'<'}
@@ -834,6 +845,12 @@ if __name__ == "__main__":
             action = get_action(view) # gets new actions
             print("ACTION")
             print(action)
+            printMap(allview)
+            print("--------")
+            printMap(exploreview)
+            print(axe)
+            print(key)
+            print(stone)
             sock.send(action.encode('utf-8'))
 
     sock.close()
