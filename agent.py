@@ -139,6 +139,7 @@ def Astar(player, coord, tree = 0, door = 0, water = 0): #generic astar function
         obstacles.pop('~')
         obstacles[' '] = 'land'
         obstacles['O'] = 'stone'
+        obstacles['$'] = 'treasure'
     while open != []:
         current = open[0]
         for i in open:
@@ -272,6 +273,8 @@ def get_action(view):
                 key = 1
             else:
                 stone = stone + 1
+        if curMove == 'f' and view[1][2] == '~' and stone > 0:
+            stone = stone-1
         moves.append(curMove)
         return curMove
     if currentPath == []:
@@ -281,7 +284,8 @@ def get_action(view):
     if inRaft == 1:
         print("IM IN A RAFT")
         goal = bfs_closest((playery,playerx),1)
-        if goal != ['false']:
+        print(goal)
+        if goal != ['false'] and Astar((playery,playerx),(goal[0],goal[1]),0,0,1):
             #print("WATER GOAL")
             #print(goal)
             goalTuple = (goal[0],goal[1])
@@ -294,7 +298,10 @@ def get_action(view):
             moves.append(move)
             return move
         else:
-            pass
+            print("SWIM")
+            printMap(swimmable())
+            #for i in swimmable():
+                
 
     resources = {'o':'Rock','k':'Key','a':'Axe'} 
     if key > 0:
@@ -431,7 +438,7 @@ def get_action(view):
         raise NameError
     except NameError:
         while 1:
-            #print('random')
+            print('random')
             inp = random.randrange(6)
             if inp < 4:
                 move = 'f'
@@ -474,7 +481,67 @@ def get_action(view):
             #time.sleep(0.25)
             moves.append(move)
             return move
-            
+
+# checks resources on an island
+def checkResources(location):
+    change = 0
+    test = copy.deepcopy(allview)
+    free = {'o': 'stone', 'T':'Tree','a':'axe',' ':'land','k':'key'}
+    stones = 0
+    trees = 0
+    axes = 0
+    keys = 0
+    allview[location[0]][location[1]] = 'C'
+    while change == 1:
+        change = 0
+        for i in range(sizex):
+            for j in range(sizey):
+                if allview[j][i] == 'C':
+                    if allview[j-1][i] in free:
+                        if allview[j-1][i] == 'o':
+                            stones = stones + 1
+                        if allview[j-1][i] == 'T':
+                            trees = trees + 1
+                        if allview[j-1][i] == 'a':
+                            axes = axes + 1
+                        if allview[j-1][i] == 'k':
+                            keys = keys + 1
+                        allview[j-1][i] = 'C'
+                        change = 1
+                    if allview[j+1][i] in free:
+                        if allview[j+1][i] == 'o':
+                            stones = stones + 1
+                        if allview[j+1][i] == 'T':
+                            trees = trees + 1
+                        if allview[j+1][i] == 'a':
+                            axes = axes + 1
+                        if allview[j+1][i] == 'k':
+                            keys = keys + 1
+                        allview[j+1][i] = 'C'
+                        change = 1
+                    if allview[j][i-1] in free:
+                        if allview[j][i-1] == 'o':
+                            stones = stones + 1
+                        if allview[j][i-1] == 'T':
+                            trees = trees + 1
+                        if allview[j][i-1] == 'a':
+                            axes = axes + 1
+                        if allview[j][i-1] == 'k':
+                            keys = keys + 1
+                        allview[j][i-1] = 'C'
+                        change = 1
+                    if allview[j][i+1] in free:
+                        if allview[j][i+1] == 'o':
+                            stones = stones + 1
+                        if allview[j][i+1] == 'T':
+                            trees = trees + 1
+                        if allview[j][i+1] == 'a':
+                            axes = axes + 1
+                        if allview[j][i+1] == 'k':
+                            keys = keys + 1
+                        allview[j][i+1] = 'C'
+                        change = 1
+
 def stoneBFS(rock):
     global allview
     test = copy.deepcopy(allview)
@@ -629,6 +696,53 @@ def walkableView():
                         water.append((i,j-1))
     return water
 
+def swimmable():
+    test = copy.deepcopy(allview)
+    free = {'~':'water'}
+    test[playery][playerx] = 'S'
+    change = 1
+    while change == 1:
+        change = 0
+        for i in range(sizey):
+            for j in range(sizex):
+                if test[i][j] == 'S':
+                        if i < curry:
+                            if test[i+1][j] in free:
+                                test[i+1][j] ='S'
+                                change = 1
+                        if i > 0:
+                            if test[i-1][j] in free:
+                                test[i-1][j] = 'S'
+                                change = 1
+                        if j < currx:
+                            if test[i][j+1] in free:
+                                test[i][j+1] = 'S'
+                                change = 1
+                        if j > 0:
+                            if test[i][j-1] in free:
+                                test[i][j-1] = 'S'
+                                change = 1
+
+    # once again to get land
+    free = {' ':'land','$':'treasure','a':'axe','k':'key','o':'stone'}
+    res = []
+    for i in range(sizey):
+        for j in range(sizex):
+            if test[i][j] == 'S':
+                    if i < curry:
+                        if test[i+1][j] in free and (i+1,j) not in res:
+                            res.append((i+1,j))
+                    if i > 0:
+                        if test[i-1][j] in free and (i-1,j) not in res:
+                            res.append((i-1,j))
+                    if j < currx:
+                        if test[i][j+1] in free and (i,j+1) not in res:
+                            res.append((i,j+1))
+                    if j > 0:
+                        if test[i][j-1] in free and (i,j-1) not in res:
+                            res.append((i,j-1))
+    
+    return res
 
 def rotate(dir, cur):
     if dir == cur:
@@ -1009,9 +1123,12 @@ if __name__ == "__main__":
                 inRaft = 1
             step = {'O':'stone',' ':'land'}
             if action == 'f' and view[1][2] in step and inRaft == 1:
+                print("INRAFT")
                 inRaft = 0
             print("currentDest")
             print(currentDest)
+            print("currentPath")
+            print(currentPath)
             print("ACTION")
             print(action)
             printMap(allview)
@@ -1019,9 +1136,11 @@ if __name__ == "__main__":
             printMap(exploreview)
             print(axe)
             print(key)
+            print("STONE",end='')
             print(stone)
             print("Raft",end="")
             print(raft)
+            print(inRaft)
             sock.send(action.encode('utf-8'))
 
     sock.close()
