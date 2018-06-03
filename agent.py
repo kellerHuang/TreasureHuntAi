@@ -65,6 +65,7 @@ def bfs_closest(coord):
     seen = [] #cells already expanded
     while Queue != []:
         coord = Queue.pop(0) #take the first node in the queue
+        print(coord)
         if exploreview[coord[0]][coord[1]] == ' ':
             return coord #if it is empty, we have found out closest empty node
         elif allview[coord[0]][coord[1]] == '*' or allview[coord[0]][coord[1]] == 'T' or allview[coord[0]][coord[1]] == '-' or \
@@ -81,7 +82,7 @@ def bfs_closest(coord):
                 seen.append([coord[0], coord[1]+1])
                 Queue.append([coord[0], coord[1]+1])
             if [coord[0] + 1, coord[1]] not in seen:
-                seen.append([coord[0], coord[1]])
+                seen.append([coord[0]+1, coord[1]])
                 Queue.append([coord[0], coord[1]]) 
     return ['false']  #if none found, return false
 
@@ -477,6 +478,11 @@ def addView(view,x,y):
     global exploreview
     global sizex
     global sizey
+    print("PLAYER")
+    print(playerx)
+    print(playery)
+    print(x)
+    print(y)
     if allview == [[]]:
         allview = copy.deepcopy(view)
         exploreview = copy.deepcopy(view) #copy the initial 5x5 view 
@@ -515,9 +521,9 @@ def addView(view,x,y):
             else:                 
             # change so that rocks can be found
                 allview[playery][playerx] = ' '
-            allview[y][x] = '>'
             # updates to playerx and playery
             playerx = playerx + 1
+            allview[playery][playerx] = '>'
                 
         # move left
         else:
@@ -545,8 +551,8 @@ def addView(view,x,y):
             else:
             # moved playerx to account for new column
                 allview[playery][playerx] = ' '
-            allview[y][x+1] = '<'
             playerx = playerx - 1
+            allview[playery][playerx] = '<'
 
     # vertical move
     elif y != playery:
@@ -574,9 +580,9 @@ def addView(view,x,y):
             # change so that rocks can be found
             else:
                 allview[playery][playerx] = ' '
-            allview[y][x] = 'v'
             # updates to playerx and playery
             playery = playery + 1
+            allview[playery][playerx] = 'v'
         # move up
         else:
             print('up')
