@@ -42,6 +42,9 @@ playery = 2
 # player orientation
 playerOri = '^'
 
+currentDest = ()
+currentPath = []
+
 moves = []
 def rotateMatrix(mat):   
     # Consider all squares one by one
@@ -63,12 +66,14 @@ def rotateMatrix(mat):
 def bfs_closest(coord):
     Queue = [[playery, playerx]] #cells to be expanded
     seen = [] #cells already expanded
+    obstacles = {'*':'Wall','T':'Tree','-':'Door','~':'Water'}
+    if key != 0:
+        obstacles.pop('-', None)
     while Queue != []:
         coord = Queue.pop(0) #take the first node in the queue
         if exploreview[coord[0]][coord[1]] == ' ':
             return coord #if it is empty, we have found out closest empty node
-        elif allview[coord[0]][coord[1]] == '*' or allview[coord[0]][coord[1]] == 'T' or allview[coord[0]][coord[1]] == '-' or \
-            allview[coord[0]][coord[1]] == '~':
+        elif allview[coord[0]][coord[1]] in obstacles:
             seen.append([coord[0], coord[1]]) #if it is not visitable unless using resources, ignore
         else: #for each neighbour, add to queue, with those facing front added first as they are closer               
             if [coord[0] - 1, coord[1]] not in seen:
@@ -101,8 +106,8 @@ def Astar(player, coord): #generic astar function, same as psuedo code on wikipe
                 current = i
         if current == coord: #if goal we are at where we need to be
             return reconstruct_path(cameFrom, current)
-        print("===========")
-        print(current)
+        # print("===========")
+        # print(current)
         open.remove(current) 
         closed.append(current)
         if allview[current[0]][current[1]] == '*' or allview[current[0]][current[1]] == 'T' or allview[current[0]][current[1]] == '-' or \
@@ -145,6 +150,8 @@ def reconstruct_path(cameFrom, current): #backtrace function
 # function to take get action from AI or user
 def get_action(view):
     global orientation
+    global currentPath
+    global currentDest
     orientation = 0
     global moves
     for i in moves:
@@ -192,10 +199,18 @@ def get_action(view):
     else:
         addView(rotate,playerx,playery)
     exploreview[playery][playerx] = 'v' #set position to visited
-    print("ALLVIEW")
-    printMap(allview)
-    print(orientation)
-    print("------------------")
+    # print("ALLVIEW")
+    # printMap(allview)
+    # print(orientation)
+    # print("------------------")
+    if currentDest != () and currentPath != []:
+        curMove = currentPath.pop(0)
+        if curMove == 'f' and view[1][2] == '-':
+            curMove == 'u'
+        moves.append(curMove)
+        return curMove
+    if currentPath == []:
+        currentDest = ()
     #printMap(exploreview)
     global key
     global axe
@@ -215,24 +230,23 @@ def get_action(view):
                     y = i
                     x = j  
                     low = abs(i-1) + abs(j-2)
-    #print(resources)
-    #print("ANALYSIS")
-    #printMap(analyse())
-    #print("ANALYSIS")
+
     coord = [] #the coordinates of the nearest unvisited cell
     result = bfs_closest(coord) #stores the nearest unvisited cell coordinates, returns false if no such cell
-    print("res")
-    print(result)
+    # print("res")
+    # print(result)
     try:
         if low < 6: #if there is an immediately reachable resource
+            currentDest = (y,x)
             path = walkable(view,x,y)
             path1 = list(path)
         elif result[0] != 'false': #if there is an unvisited cell
             res_coord = (result[0], result[1])
-            path = Astar([playery, playerx], res_coord) #astar returns the path from current player position to coord           
-            print(path)
+            path = Astar([playery, playerx], res_coord) #astar returns the path from current player position to coord   
+            currentDest = res_coord        
+#            print(path)
             path1 = list(revPath(path))
-            print(path1)
+#            print(path1)
             #TODO TURN IT INTO PATH1. RN ASTAR RETURNS THE PATH IN REVERSE. TURN INTO ACTIONS TO PASS INTO THE LINE BELOW vvv
         if path1[0] != 'F':
             #time.sleep(0.25)
@@ -250,8 +264,11 @@ def get_action(view):
             if view[1][2] == 'o' and move == 'f':
                 stone = stone + 1
             moves.append(path1[0])
+            currentPath = path1[1:]
             print(path1)
             return path1[0]
+        else:
+            currentDest = ()
         raise NameError
     except NameError:
         while 1:
@@ -506,11 +523,6 @@ def addView(view,x,y):
     global exploreview
     global sizex
     global sizey
-    print("PLAYER")
-    print(playerx)
-    print(playery)
-    print(x)
-    print(y)
     if allview == [[]]:
         allview = copy.deepcopy(view)
         exploreview = copy.deepcopy(view) #copy the initial 5x5 view 
