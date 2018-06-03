@@ -82,7 +82,7 @@ def bfs_closest(coord):
                 Queue.append([coord[0], coord[1]+1])
             if [coord[0] + 1, coord[1]] not in seen:
                 seen.append([coord[0], coord[1]])
-                Queue.append([coord[0], coord[1]])
+                Queue.append([coord[0], coord[1]]) 
     return ['false']  #if none found, return false
 
 def Astar(player, coord): #generic astar function, same as psuedo code on wikipedia
@@ -188,7 +188,7 @@ def get_action(view):
     printMap(allview)
     print(orientation)
     print("------------------")
-   #printMap(exploreview)
+    printMap(exploreview)
     global key
     global axe
     global stone
@@ -526,19 +526,22 @@ def addView(view,x,y):
                 # initiate new squares created with '?'
                 allview = addStartColumn(allview,sizex,sizey,'?')
                 exploreview = addStartColumn(exploreview,sizex,sizey,' ')
-                #TODO TURN THE ? INTO ' '
-                #^^^^^^^^^^^^^^^^^^^^^^^^
                 playerx = playerx + 1
                 currx = currx + 1
                 sizex = sizex + 1
             # check allview and replace squares since replacing older squares dont matter for correctness
+            print("TESTx")
+            print(playerx)
+            print(playery)
+            printMap(view)
             for i in range(5):
                 # replace squares
                 allview[playery - 2 + i][playerx - 3] = view[i][0]
                 if view[i][0] == '*' or exploreview[playery - 2 + i][playerx - 3] == 'v': #same as above
                     exploreview[playery - 2 + i][playerx - 3] = 'v'
                 else:
-                    exploreview[playery - 2 + 1][playerx - 3] = ' '                
+                    exploreview[playery - 2 + i][playerx - 3] = ' '                                  
+                printMap(exploreview)
             # change player location
             if view[2][3] == 'O':
                 allview[playery][playerx] = 'O'                 
@@ -548,6 +551,9 @@ def addView(view,x,y):
                 allview[playery][playerx] = ' '
             allview[y][x+1] = '<'
             playerx = playerx - 1
+            print("OVERALL")
+            printMap(exploreview)
+            print()
 
     # vertical move
     elif y != playery:
