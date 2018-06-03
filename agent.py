@@ -106,9 +106,9 @@ def Astar(player, coord): #generic astar function, same as psuedo code on wikipe
     while open != []:
         current = open[0]
         for i in open:
-            if fscore[i] < fscore[current]:
-                current = i
-
+            if i in fscore:
+                if fscore[i] < fscore[current]:
+                    current = i
         if current == coord: #if goal we are at where we need to be
             return reconstruct_path(cameFrom, current)
         # print("===========")
