@@ -95,6 +95,7 @@ def bfs_closest(coord,trees = 0):
     return ['false']  #if none found, return false
 
 def Astar(player, coord, tree = 0, door = 0): #generic astar function, same as psuedo code on wikipedia
+    print("ASTAR **************************")
     print(player)
     print(coord)
     closed = [] #set of nodes already seen
@@ -108,7 +109,6 @@ def Astar(player, coord, tree = 0, door = 0): #generic astar function, same as p
     obstacles = {'*':'wall','T':'tree','-':'door','~':'water'}
     if tree == 1:
         obstacles.pop('T')
-        print("popped")
     if door == 1:
         obstacles.pop('-')
     while open != []:
@@ -140,19 +140,23 @@ def Astar(player, coord, tree = 0, door = 0): #generic astar function, same as p
             if i not in open: #if node not yet expanded, add to queue
                 open.append(i)
             if current not in gscore.keys():
-                gscore[current] = 100 
+                gscore[current] = 10000
             if i not in gscore.keys():
-                gscore[i] = 100  
+                gscore[i] = 10000  
             tent = gscore[current] + abs(current[0] - coord[0]) + abs(current[1] - coord[1])
             if tent >= gscore[i]: #check if this distance is shorter than the previous
                 continue #if not, ignore
             cameFrom[i] = current #otherwise, update where this node came from
+            if i == (6,4):
+                print("ADDED")
             gscore[i] = tent
             fscore[i] = gscore[i] + math.sqrt(abs(current[0] - coord[0])**2 + abs(current[1] - coord[1])**2)
 
     return False #if not found, return false
 
 def reconstruct_path(cameFrom, current): #backtrace function
+    print(cameFrom)
+    print(current)
     total_path = [current] 
     while current in cameFrom:
         current = cameFrom[current]
@@ -275,21 +279,16 @@ def get_action(view):
             move = path1[0]
             if view[1][2] == 'T' and axe == 1 and move == 'f':
                 raft =  1
-                print("abcdef")
                 moves.append('c')
                 return 'c'
             if view[1][2] == 'a' and axe == 0 and move == 'f':
-                print("abcdef")
                 axe = 1
             if view[1][2] == 'k' and key == 0 and move == 'f':
-                print("abcdef")
                 key = 1
             if view[1][2] == '-' and key == 1 and move == 'f':
-                print("abcdef")
                 moves.append('u')
                 return 'u'
             if view[1][2] == 'o' and move == 'f':
-                print("abcdef")
                 stone = stone + 1
             moves.append(path1[0])
             currentPath = path1[1:]
@@ -311,9 +310,7 @@ def get_action(view):
             for i in range(sizey):
                 for j in range(sizex):
                     if allview[i][j] == 'T':
-                        print(Astar([playery,playerx],[i,j],1))
-                        if Astar([playery,playerx],[i,j],1) != False:
-                            print("FFFF")
+                        if Astar((playery,playerx),(i,j),1) != False:
                             trees[(i,j)] = entropy[i][j]
             
             # sort by entropy
@@ -329,6 +326,10 @@ def get_action(view):
             print(node)
             if node != ():
                 path = Astar((playery,playerx),node,1)
+                print("XD")
+                print(path)
+                print(playery)
+                print(playerx)
                 path1 = list(revPath(path))
                 if len(path1) == 1:
                     move = 'c'
