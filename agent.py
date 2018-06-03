@@ -959,9 +959,9 @@ def addView(view,x,y):
             # check allview and replace squares since replacing older squares dont matter for correctness
             for i in range(5):
                 # replace square
-                if treasure != [] and view[4][i] == 'T':
+                if treasure != [] and view[0][i] == 'T':
                     treasure = [treasure[0]+1, treasure[1]]
-                elif view[4][i] == 'T':
+                elif view[0][i] == 'T':
                     treasure = [playery-3, playerx-2+i]
                 allview[playery - 3][playerx - 2 + i] = view[0][i]
                 if view[0][i] in obstacle or exploreview[playery - 3][playerx - 2 + i] == 'v': #same as above
