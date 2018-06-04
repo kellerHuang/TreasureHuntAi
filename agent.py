@@ -1,11 +1,5 @@
 #!/usr/bin/python3
-# ^^ note the python directive on the first line
-# COMP 9414 agent initiation file 
-# requires the host is running before the agent
-# designed for python 3.6
-# typical initiation would be (file in working directory, port = 31415)
-#        python3 agent.py -p 31415
-# created by Leo Hoare
+# created by Keller Huang and Sheng An Zhang
 # with slight modifications by Alan Blair
 
 #Briefly describe how your program works, including any algorithms and data structures employed, and explain any design decisions you made along the way.
@@ -72,23 +66,17 @@ currentDest = ()
 currentPath = []
 
 moves = []
-def rotateMatrix(mat):   
-    # Consider all squares one by one
+#rotates matrix in-place
+def rotateMatrix(matrix):   
     for x in range(0, int(5/2)):
-    # Consider elements in group   
-    # of 4 in current square
         for y in range(x, 5-x-1):
-            # store current cell in temp variable
-            temp = mat[x][y]
-            # move values from right to top
-            mat[x][y] = mat[y][5-1-x]
-            # move values from bottom to right
-            mat[y][5-1-x] = mat[5-1-x][5-1-y]
-            # move values from left to bottom
-            mat[5-1-x][5-1-y] = mat[5-1-y][x]
-            # assign temp to left
-            mat[5-1-y][x] = temp
-
+            temp = matrix[x][y]
+            matrix[x][y] = matrix[y][5-1-x]
+            matrix[y][5-1-x] = matrix[5-1-x][5-1-y]
+            matrix[5-1-x][5-1-y] = matrix[5-1-y][x]
+            matrix[5-1-y][x] = temp
+            
+#bfs to closest needed cell based on input
 def bfs_closest(start,water = 0):
     Queue = [[start[0], start[1]]] #cells to be expanded
     seen = [] #cells already expanded
@@ -125,7 +113,7 @@ def bfs_closest(start,water = 0):
                 Queue.append([coord[0]+1, coord[1]]) 
     print("BFSRETFALSE")
     return ['false']  #if none found, return false
-
+#astar from one cell to another based on parameters
 def Astar(player, coord, tree = 0, door = 0, water = 0,land = 0): #generic astar function, same as psuedo code on wikipedia
     closed = [] #set of nodes already seen
     neighbours = [(player[0]-1, player[1]), (player[0]+1, player[1]), (player[0], player[1]+1), (player[0], player[1]-1)] #all possible adjacent cells
@@ -210,7 +198,7 @@ def path_back(origin, treasure):
     #     if allview[path[i][0]][path[i][1]] == '~' and allview[path[i-1][0]][path[i-1][1]] == ' ':
     #         count = count + 1
     return revPath(path)
-    
+#back traces the astar path    
 def reconstruct_path(cameFrom, current): #backtrace function
     total_path = [current] 
     while current in cameFrom:
@@ -659,7 +647,7 @@ def checkResources(location):
                         test[j][i+1] = 'C'
                         change = 1
     return (axes,keys,trees,stones,doors)
-
+#places potential stones to look for best stone placement
 def stoneBFS(rock):
     global allview
     global exploreview
@@ -682,7 +670,7 @@ def stoneBFS(rock):
             exploreview = test2
             allview = test
             return False
-
+#takes a path and turns it into actionable moves
 def revPath(path):
     print("PATH GIVEN")
     fpath = path[::-1]
@@ -712,7 +700,7 @@ def revPath(path):
     print("REV")
     print(newP)
     return turnToPath(newP,orientation)
-
+#checks if a cell is directly walkable in the 5x5 view
 def walkable(view,x,y):
     # find location of player
     test = copy.deepcopy(view)
