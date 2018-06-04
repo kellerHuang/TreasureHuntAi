@@ -93,19 +93,18 @@ def bfs_closest(start,water = 0):
     Queue = [[start[0], start[1]]] #cells to be expanded
     seen = [] #cells already expanded
     obstacles = {'*':'Wall','T':'Tree','-':'Door','~':'Water','.':'OOB'}
-    goal = ' '
-    extra = 'x'
+    goal = {' ':'land','$': 'treasure'}
     if key != 0:
-        extra = '-'
+        goal['-'] = 'door'
     if water == 1:
         obstacles.pop('~', None)
         obstacles[' '] = 'Land'
         obstacles['$'] = 'Treasure'
-        goal = '~'
+        goal = {'~':'water'}
         #print("WATER")
     while Queue != []:
         coord = Queue.pop(0) #take the first node in the queue
-        if exploreview[coord[0]][coord[1]] == ' ' and (allview[coord[0]][coord[1]] == goal or allview[coord[0]][coord[1]] in extra):
+        if exploreview[coord[0]][coord[1]] == ' ' and allview[coord[0]][coord[1]] in goal:
            # print("BFS RETURN",end='')
            # print(coord)
             return coord #if it is empty, we have found out closest empty node
@@ -365,6 +364,25 @@ def get_action(view):
                 moves.append(move)
                 print("endswim")
                 return move
+            else:
+                curr = ()
+                # no free islands
+                for i in swimmable():
+                    for m in checkResources(i):
+                        if m > 0:
+                            curr = i
+                            break
+                    if curr != ():
+                        break
+
+                if curr != ():
+                    currentDest = curr
+                    path = Astar((playery,playerx),curr,0,0,1)
+                    path1 = list(revPath(path))
+                    currentPath = path1[1:]
+                    move = path1[0]
+                    moves.append(move)
+                    return move
                 
 
     resources = {'o':'Rock','k':'Key','a':'Axe'} 
@@ -579,6 +597,7 @@ def checkResources(location):
     trees = 0
     axes = 0
     keys = 0
+    doors = 0
     if key == 1:
         free['-'] = 'door'
     test[location[0]][location[1]] = 'C'
@@ -596,6 +615,8 @@ def checkResources(location):
                             axes = axes + 1
                         if test[j-1][i] == 'k':
                             keys = keys + 1
+                        if test[j-1][i] == '-':
+                            doors = doors + 1
                         test[j-1][i] = 'C'
                         change = 1
                     if test[j+1][i] in free:
@@ -607,6 +628,8 @@ def checkResources(location):
                             axes = axes + 1
                         if test[j+1][i] == 'k':
                             keys = keys + 1
+                        if test[j+1][i] == '-':
+                            doors = doors + 1
                         test[j+1][i] = 'C'
                         change = 1
                     if test[j][i-1] in free:
@@ -618,6 +641,8 @@ def checkResources(location):
                             axes = axes + 1
                         if test[j][i-1] == 'k':
                             keys = keys + 1
+                        if test[j][i-1] == '-':
+                            doors = doors + 1
                         test[j][i-1] = 'C'
                         change = 1
                     if test[j][i+1] in free:
@@ -629,9 +654,11 @@ def checkResources(location):
                             axes = axes + 1
                         if test[j][i+1] == 'k':
                             keys = keys + 1
+                        if test[j][i+1] == '-':
+                            doors = doors + 1
                         test[j][i+1] = 'C'
                         change = 1
-    return (axes,keys,trees,stones)
+    return (axes,keys,trees,stones,doors)
 
 def stoneBFS(rock):
     global allview
