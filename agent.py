@@ -94,8 +94,9 @@ def bfs_closest(start,water = 0):
     seen = [] #cells already expanded
     obstacles = {'*':'Wall','T':'Tree','-':'Door','~':'Water','.':'OOB'}
     goal = ' '
+    extra = ' '
     if key != 0:
-        obstacles.pop('-', None)
+        extra = '-'
     if water == 1:
         obstacles.pop('~', None)
         obstacles[' '] = 'Land'
@@ -103,23 +104,24 @@ def bfs_closest(start,water = 0):
         #print("WATER")
     while Queue != []:
         coord = Queue.pop(0) #take the first node in the queue
-        if exploreview[coord[0]][coord[1]] == ' ' and allview[coord[0]][coord[1]] == goal:
+        print(coord)
+        if exploreview[coord[0]][coord[1]] == ' ' and (allview[coord[0]][coord[1]] == goal or allview[coord[0]][coord[1]] == extra):
            # print("BFS RETURN",end='')
            # print(coord)
             return coord #if it is empty, we have found out closest empty node
         elif allview[coord[0]][coord[1]] in obstacles:
             seen.append([coord[0], coord[1]]) #if it is not visitable unless using resources, ignore
         else: #for each neighbour, add to queue, with those facing front added first as they are closer               
-            if [coord[0] - 1, coord[1]] not in seen:
+            if [coord[0] - 1, coord[1]] not in seen and coord[0] - 1 > 0:
                 seen.append([coord[0]-1, coord[1]])
                 Queue.append([coord[0]-1, coord[1]])
-            if [coord[0], coord[1]-1] not in seen:
+            if [coord[0], coord[1]-1] not in seen and coord[1] - 1 > 0:
                 seen.append([coord[0], coord[1]-1])
                 Queue.append([coord[0], coord[1]-1])
-            if [coord[0], coord[1]+1] not in seen:
+            if [coord[0], coord[1]+1] not in seen and coord[1] + 1 < sizex:
                 seen.append([coord[0], coord[1]+1])
                 Queue.append([coord[0], coord[1]+1])
-            if [coord[0] + 1, coord[1]] not in seen:
+            if [coord[0] + 1, coord[1]] not in seen and coord[0] + 1 < sizey:
                 seen.append([coord[0]+1, coord[1]])
                 Queue.append([coord[0]+1, coord[1]]) 
     return ['false']  #if none found, return false
@@ -145,16 +147,12 @@ def Astar(player, coord, tree = 0, door = 0, water = 0,land = 0): #generic astar
         obstacles['$'] = 'treasure'
     if land == 1:
         obstacles = {'*':'wall','.':'OOB'}
-        print("ASTAR")
-        print(obstacles)
     while open != []:
         current = open[0]
         for i in open:
             if i in fscore:
                 if fscore[i] < fscore[current]:
                     current = i
-        if land == 1:
-            print(current)
         if current == coord: #if goal we are at where we need to be
             return reconstruct_path(cameFrom, current)
         # print("===========")
@@ -329,8 +327,8 @@ def get_action(view):
         goal = bfs_closest((playery,playerx),1)
         print(goal)
         if goal != ['false'] and Astar((playery,playerx),(goal[0],goal[1]),0,0,1):
-            #print("WATER GOAL")
-            #print(goal)
+            print("WATER GOAL")
+            print(goal)
             goalTuple = (goal[0],goal[1])
             path = Astar((playery,playerx),goalTuple,0,0,1)
             #print(path)
@@ -450,7 +448,7 @@ def get_action(view):
                 #print(playery)
                 #print(playerx)
                 path1 = list(revPath(path))
-                if len(path1) == 1:
+                if len(path1) == 1 and axe == 1:
                     move = 'c'
                     raft = 1
                     moves.append('c')
@@ -464,33 +462,34 @@ def get_action(view):
             else:
             # tree not found
                 pass
-            print("WALKABLE")
-            print(walkableView())
-            tiles = walkableView()
-            res = []
-            for i in tiles:
-                if stoneBFS([i]) != False:
-                    res = [i]
-                    break
-            p = []
-            for i in res:
-                test = copy.deepcopy(allview)
-                allview[i[0]][i[1]] = ' '
-                if Astar((playery,playerx),i) != False:
-                    p = Astar((playery,playerx),i)
+            if stone > 0:
+                print("WALKABLE")
+                print(walkableView())
+                tiles = walkableView()
+                res = []
+                for i in tiles:
+                    if stoneBFS([i]) != False:
+                        res = [i]
+                        break
+                p = []
+                for i in res:
+                    test = copy.deepcopy(allview)
+                    allview[i[0]][i[1]] = ' '
+                    if Astar((playery,playerx),i) != False:
+                        p = Astar((playery,playerx),i)
+                        allview = test
+                        break
                     allview = test
-                    break
-                allview = test
-            
-            if p != []:
-                sPath = list(revPath(p))
-                print("PATH FOUND")
-                print(sPath)
-                currentDest = res[0]
-                currentPath = sPath[1:]
-                move = sPath[0]
-                moves.append(move)
-                return move            
+                
+                if p != []:
+                    sPath = list(revPath(p))
+                    print("PATH FOUND")
+                    print(sPath)
+                    currentDest = res[0]
+                    currentPath = sPath[1:]
+                    move = sPath[0]
+                    moves.append(move)
+                    return move            
         raise NameError
     except NameError:
         if raft == 1:
@@ -1065,7 +1064,7 @@ def addView(view,x,y):
                 allview[playery][playerx-1] = ' '
             elif view[2][1] == ' ' and allview[playery][playerx-1] == 'T':
                 allview[playery][playerx-1] = ' '
-        elif playerOri == '^':
+        elif playerOri == '>':
             if view[2][3] == ' ' and allview[playery][playerx+1] == '-':
                 allview[playery][playerx+1] = ' '
             elif view[2][3] == ' ' and allview[playery][playerx+1] == 'T':
@@ -1222,6 +1221,8 @@ if __name__ == "__main__":
         if j==0 and i==0:
             print_grid(view) # COMMENT THIS OUT ON SUBMISSION
             raftB = raft
+            if sizex > 28 or sizey > 14:
+                print("WARNING")
             action = get_action(view) # gets new actions
             if action == 'f' and view[1][2] == '~' and raftB != raft:
                 inRaft = 1
