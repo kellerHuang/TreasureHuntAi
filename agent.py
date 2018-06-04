@@ -94,18 +94,18 @@ def bfs_closest(start,water = 0):
     seen = [] #cells already expanded
     obstacles = {'*':'Wall','T':'Tree','-':'Door','~':'Water','.':'OOB'}
     goal = ' '
-    extra = ' '
+    extra = 'x'
     if key != 0:
         extra = '-'
     if water == 1:
         obstacles.pop('~', None)
         obstacles[' '] = 'Land'
+        obstacles['$'] = 'Treasure'
         goal = '~'
         #print("WATER")
     while Queue != []:
         coord = Queue.pop(0) #take the first node in the queue
-        print(coord)
-        if exploreview[coord[0]][coord[1]] == ' ' and (allview[coord[0]][coord[1]] == goal or allview[coord[0]][coord[1]] == extra):
+        if exploreview[coord[0]][coord[1]] == ' ' and (allview[coord[0]][coord[1]] == goal or allview[coord[0]][coord[1]] in extra):
            # print("BFS RETURN",end='')
            # print(coord)
             return coord #if it is empty, we have found out closest empty node
@@ -124,6 +124,7 @@ def bfs_closest(start,water = 0):
             if [coord[0] + 1, coord[1]] not in seen and coord[0] + 1 < sizey:
                 seen.append([coord[0]+1, coord[1]])
                 Queue.append([coord[0]+1, coord[1]]) 
+    print("BFSRETFALSE")
     return ['false']  #if none found, return false
 
 def Astar(player, coord, tree = 0, door = 0, water = 0,land = 0): #generic astar function, same as psuedo code on wikipedia
@@ -147,6 +148,9 @@ def Astar(player, coord, tree = 0, door = 0, water = 0,land = 0): #generic astar
         obstacles['$'] = 'treasure'
     if land == 1:
         obstacles = {'*':'wall','.':'OOB'}
+    print(obstacles)
+    print(player)
+    print(coord)
     while open != []:
         current = open[0]
         for i in open:
@@ -199,7 +203,7 @@ def Astar(player, coord, tree = 0, door = 0, water = 0,land = 0): #generic astar
 # returns path
 def path_back(origin, treasure):
     print("PPPP")
-    path = Astar(treasure, (origin[0],origin[1]), 1, 1, 1,1)
+    path = Astar((playery,playerx), (origin[0],origin[1]), 1, 1, 1,1)
     print(path)
     # if len(path) == 1:
     #     return path
@@ -320,6 +324,9 @@ def get_action(view):
         path = path_back(origin,treasure)
         currentDest = (treasure[0],treasure[1])
         currentPath = list(path[1:])
+        moves.append(path[0])
+        print("THIS PATH")
+        print(path)
         return path[0]
     ### Water Movement
     if inRaft == 1:
@@ -340,18 +347,24 @@ def get_action(view):
             return move
         else:
             print("SWIM")
-            printMap(swimmable())
+            high = 0
+            curr = ()
+            print(swimmable())
             for i in swimmable():
-                print(i)
-                print(checkResources(i))
-                if checkResources(i)[2] > 0:
-                    currentDest = i
-                    path = Astar((playery,playerx),i,0,0,1)
-                    path1 = list(revPath(path))
-                    currentPath = path1[1:]
-                    move = path1[0]
-                    moves.append(move)
-                    return move
+                if checkResources(i)[0] + checkResources(i)[1] + checkResources(i)[3] > high:
+                    curr = i
+                    high = checkResources(i)[0] + checkResources(i)[1] + checkResources(i)[3]
+                    print("XYZ")
+                    print(checkResources(i))
+            if curr != () and checkResources(curr)[2] > 0:
+                currentDest = curr
+                path = Astar((playery,playerx),curr,0,0,1)
+                path1 = list(revPath(path))
+                currentPath = path1[1:]
+                move = path1[0]
+                moves.append(move)
+                print("endswim")
+                return move
                 
 
     resources = {'o':'Rock','k':'Key','a':'Axe'} 
@@ -566,6 +579,8 @@ def checkResources(location):
     trees = 0
     axes = 0
     keys = 0
+    if key == 1:
+        free['-'] = 'door'
     test[location[0]][location[1]] = 'C'
     while change == 1:
         change = 0
@@ -642,8 +657,9 @@ def stoneBFS(rock):
             return False
 
 def revPath(path):
+    print("PATH GIVEN")
     fpath = path[::-1]
-
+    print(fpath)
     # print("FPATH")
     # print(fpath)
     # print(orientation)
@@ -666,6 +682,8 @@ def revPath(path):
                     newP = newP + "L"
         curr = i
     #print(newP)
+    print("REV")
+    print(newP)
     return turnToPath(newP,orientation)
 
 def walkable(view,x,y):
@@ -1221,8 +1239,10 @@ if __name__ == "__main__":
         if j==0 and i==0:
             print_grid(view) # COMMENT THIS OUT ON SUBMISSION
             raftB = raft
-            if sizex > 28 or sizey > 14:
+            if sizex > 31 or sizey > 19:
                 print("WARNING")
+                print(sizex)
+                print(sizey)
             action = get_action(view) # gets new actions
             if action == 'f' and view[1][2] == '~' and raftB != raft:
                 inRaft = 1
@@ -1249,6 +1269,7 @@ if __name__ == "__main__":
             print(stone)
             print("Raft",end="")
             print(raft)
+            print("inRaft",end="")
             print(inRaft)
             sock.send(action.encode('utf-8'))
 
