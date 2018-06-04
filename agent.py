@@ -372,6 +372,9 @@ def get_action(view):
 
     coord = (playery,playerx) #the coordinates of the nearest unvisited cell
     result = bfs_closest(coord) #stores the nearest unvisited cell coordinates, returns false if no such cell
+    if result[0] == 'false':
+        print("OOM")
+    print(result[0])
     # print("res")
     # print(result)
     try:
@@ -382,7 +385,7 @@ def get_action(view):
             path = walkable(view,x,y)
             path1 = list(path)
             print(path1)
-        elif result[0] != 'false': #if there is an unvisited cell
+        if result[0] != 'false' and path1[0] == 'F': #if there is an unvisited cell
             print("ADDDEEEED")
             res_coord = (result[0], result[1])
             path = Astar([playery, playerx], res_coord) #astar returns the path from current player position to coord   
@@ -421,7 +424,7 @@ def get_action(view):
             #    if 
 
             #optimal version
-            #print("TREE")
+            print("TREE")
             trees = {}
             entropy = analyse()
             for i in range(sizey):
@@ -490,6 +493,26 @@ def get_action(view):
                 return move            
         raise NameError
     except NameError:
+        if raft == 1:
+            print(walkableView())
+            high = 0
+            curr = ()
+            entropy = analyse()
+            for i in walkableView():
+                if entropy[i[0]][i[1]] > high:
+                    high = entropy[i[0]][i[1]]
+                    curr = (i[0],i[1])
+            if curr != ():
+                print("GO")
+                print(Astar((playery,playerx),curr))
+                path = Astar((playery,playerx),curr)
+                path1 = list(revPath(path))
+                currentDest = curr
+                currentPath = path1[1:]
+                move = path1[0]
+                moves.append(move)
+                return move
+                
         while 1:
             print('random')
             inp = random.randrange(6)
@@ -598,15 +621,24 @@ def checkResources(location):
 
 def stoneBFS(rock):
     global allview
+    global exploreview
     test = copy.deepcopy(allview)
+    test2 = copy.deepcopy(exploreview)
     for i in rock:
         print("STONEBFS")
         print(i)
         allview[i[0]][i[1]] = ' '
-        if bfs_closest((playery,playerx)) != False:
+        exploreview[i[0]][i[1]] = 'v'
+        if bfs_closest((playery,playerx)) != ['false']:
+            print("F")
+            printMap(exploreview)
+            print("FALSEe")
+            print(bfs_closest((playery,playerx)))
+            exploreview = test2
             allview = test
             return True
         else:
+            exploreview = test2
             allview = test
             return False
 
@@ -738,16 +770,16 @@ def walkableView():
         for j in range(sizex):
             if test[i][j]== 'W':
                 if i < curry:
-                    if test[i+1][j] in free:
+                    if test[i+1][j] in free and (i+1,j) not in water:
                         water.append((i+1,j))
                 if i > 0:
-                    if test[i-1][j] in free:
+                    if test[i-1][j] in free and (i-1,j) not in water:
                         water.append((i-1,j))
                 if j < currx:
-                    if test[i][j+1] in free:
+                    if test[i][j+1] in free and (i,j+1) not in water:
                         water.append((i,j+1))
                 if j > 0:
-                    if test[i][j-1] in free:
+                    if test[i][j-1] in free and (i,j-1) not in water:
                         water.append((i,j-1))
     return water
 
@@ -1199,6 +1231,8 @@ if __name__ == "__main__":
                 inRaft = 0
             if action == 'f' and view[1][2] == '$':
                 treasureBool = 1
+            print("currentLoc:",end='')
+            print((playery,playerx))
             print("currentDest")
             print(currentDest)
             print("currentPath")
