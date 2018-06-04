@@ -51,6 +51,7 @@ orientation = 0
 inRaft = 0
 origin = []
 treasure = []
+treasureBool = 0
 # curr is a rotated view
 # a and b are the x and y co-ordinates of the middle tile of the view
 
@@ -123,7 +124,7 @@ def bfs_closest(start,water = 0):
                 Queue.append([coord[0]+1, coord[1]]) 
     return ['false']  #if none found, return false
 
-def Astar(player, coord, tree = 0, door = 0, water = 0): #generic astar function, same as psuedo code on wikipedia
+def Astar(player, coord, tree = 0, door = 0, water = 0,land = 0): #generic astar function, same as psuedo code on wikipedia
     closed = [] #set of nodes already seen
     neighbours = [(player[0]-1, player[1]), (player[0]+1, player[1]), (player[0], player[1]+1), (player[0], player[1]-1)] #all possible adjacent cells
     open = [(player[0], player[1])] #set of nodes yet to be expanded
@@ -142,6 +143,8 @@ def Astar(player, coord, tree = 0, door = 0, water = 0): #generic astar function
         obstacles[' '] = 'land'
         obstacles['O'] = 'stone'
         obstacles['$'] = 'treasure'
+    if land == 1:
+        obstacles.pop(' ', None)
     while open != []:
         current = open[0]
         for i in open:
@@ -190,15 +193,18 @@ def Astar(player, coord, tree = 0, door = 0, water = 0): #generic astar function
             fscore[i] = gscore[i] + math.sqrt(abs(current[0] - coord[0])**2 + abs(current[1] - coord[1])**2)
 
     return False #if not found, return false
+
+# returns path
 def path_back(origin, treasure):
-    count = 0
-    path = Astar(treasure, origin, 1, 1, 1)
-    if len(path) == 1:
-        return path
-    for i in range(1, len(path)):
-        if allview[path[i][0]][path[i][1]] == '~' and allview[path[i-1][0]][path[i-1][1]] == ' ':
-            count = count + 1
-     
+    print("PPPP")
+    path = Astar(treasure, origin, 1, 1, 1,1)
+    print(path)
+    # if len(path) == 1:
+    #     return path
+    # for i in range(1, len(path)):
+    #     if allview[path[i][0]][path[i][1]] == '~' and allview[path[i-1][0]][path[i-1][1]] == ' ':
+    #         count = count + 1
+    return revPath(path)
     
 def reconstruct_path(cameFrom, current): #backtrace function
     total_path = [current] 
@@ -269,8 +275,6 @@ def get_action(view):
     else:
         addView(rotate,playerx,playery)
     exploreview[playery][playerx] = 'v' #set position to visited
-
-
     item = {'a':'axe','o':'rock','k':'key'}
     if currentDest != () and currentPath != []:
         #print("my current destination is")
@@ -297,7 +301,12 @@ def get_action(view):
         return curMove
     if currentPath == []:
         currentDest = ()
-
+    if treasureBool == 1:
+        print("TREASURE FOUND")
+        path = path_back(origin,treasure)
+        currentDest = (treasure[0],treasure[1])
+        currentPath = path[1:]
+        return path[0]
     ### Water Movement
     if inRaft == 1:
         print("IM IN A RAFT")
@@ -1172,6 +1181,8 @@ if __name__ == "__main__":
             if action == 'f' and view[1][2] in step and inRaft == 1:
                 print("INRAFT")
                 inRaft = 0
+            if action == 'f' and view[1][2] == '$':
+                treasureBool = 1
             print("currentDest")
             print(currentDest)
             print("currentPath")
