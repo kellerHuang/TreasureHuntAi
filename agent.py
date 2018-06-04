@@ -133,7 +133,7 @@ def Astar(player, coord, tree = 0, door = 0, water = 0,land = 0): #generic astar
     gscore[(player[0], player[1])] = 0
     fscore = {} #cost of getting from    start node to that node. Requires heuristic
     fscore[(player[0], player[1])] = math.sqrt(abs(player[0] - coord[0])**2 + abs(player[1] - coord[1])**2) #birds eye distance as heuristic
-    obstacles = {'*':'wall','T':'tree','-':'door','~':'water'}
+    obstacles = {'*':'wall','T':'tree','-':'door','~':'water','.':'OOB'}
     if tree == 1:
         obstacles.pop('T')
     if door == 1:
@@ -144,13 +144,17 @@ def Astar(player, coord, tree = 0, door = 0, water = 0,land = 0): #generic astar
         obstacles['O'] = 'stone'
         obstacles['$'] = 'treasure'
     if land == 1:
-        obstacles.pop(' ', None)
+        obstacles = {'*':'wall','.':'OOB'}
+        print("ASTAR")
+        print(obstacles)
     while open != []:
         current = open[0]
         for i in open:
             if i in fscore:
                 if fscore[i] < fscore[current]:
                     current = i
+        if land == 1:
+            print(current)
         if current == coord: #if goal we are at where we need to be
             return reconstruct_path(cameFrom, current)
         # print("===========")
@@ -197,7 +201,7 @@ def Astar(player, coord, tree = 0, door = 0, water = 0,land = 0): #generic astar
 # returns path
 def path_back(origin, treasure):
     print("PPPP")
-    path = Astar(treasure, origin, 1, 1, 1,1)
+    path = Astar(treasure, (origin[0],origin[1]), 1, 1, 1,1)
     print(path)
     # if len(path) == 1:
     #     return path
@@ -297,6 +301,18 @@ def get_action(view):
             raft = 0
         if curMove == 'f' and view[1][2] == '~' and stone > 0:
             stone = stone-1
+        if curMove == 'f' and view[1][2] == '~' and raft == 0 and stone == 0 and treasureBool == 1:
+            # rethink moves
+            if Astar((playery,playerx),(origin[0],origin[1]),axe,key) != False:
+                print("ANOTHER WAY")
+                currentDest = (origin[0],origin[1])
+                path = Astar((playery,playerx),(origin[0],origin[1]),axe,key)
+                path1 = list(revPath(path))
+                currentPath = path1[1:]
+                move = path1[0]
+                moves.append(move)
+                return move
+            
         moves.append(curMove)
         return curMove
     if currentPath == []:
@@ -305,7 +321,7 @@ def get_action(view):
         print("TREASURE FOUND")
         path = path_back(origin,treasure)
         currentDest = (treasure[0],treasure[1])
-        currentPath = path[1:]
+        currentPath = list(path[1:])
         return path[0]
     ### Water Movement
     if inRaft == 1:
